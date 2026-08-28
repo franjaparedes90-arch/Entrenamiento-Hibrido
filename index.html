@@ -312,16 +312,26 @@ var fsdb = firebase.firestore();
 var fsauth = firebase.auth();
 var ALLOWED_EMAIL = 'franjaparedes90@gmail.com';
 
+/* 2026-08-27: se usa signInWithPopup en vez de signInWithRedirect. Con la app viviendo fuera del
+ * dominio propio de Firebase (GitHub Pages, no *.firebaseapp.com/*.web.app), el resultado de
+ * signInWithRedirect depende de que el navegador permita almacenamiento/IndexedDB entre el dominio
+ * de la app y el de Firebase para "recordar" el login al volver — cada vez más navegadores lo
+ * bloquean por defecto, y el fallo es silencioso: no tira ningún error, simplemente vuelve sin
+ * sesión iniciada (bucle infinito de login). signInWithPopup no tiene ese problema porque la
+ * respuesta viaja por postMessage dentro de la misma pestaña, sin depender de ese almacenamiento
+ * cruzado — es la alternativa que recomienda la propia documentación de Firebase para apps que no
+ * viven en su dominio. Requiere que el navegador permita ventanas emergentes para este sitio. */
 function signInWithGoogle_() {
   el('authGateError').classList.add('hidden');
   var provider = new firebase.auth.GoogleAuthProvider();
-  fsauth.signInWithRedirect(provider);
+  fsauth.signInWithPopup(provider).catch(function (err) {
+    var msg = err && err.code === 'auth/popup-blocked'
+      ? 'El navegador bloqueó la ventana emergente de Google — permití ventanas emergentes para este sitio e intentá de nuevo.'
+      : 'No se pudo iniciar sesión: ' + (err && err.message ? err.message : err);
+    el('authGateError').textContent = msg;
+    el('authGateError').classList.remove('hidden');
+  });
 }
-
-fsauth.getRedirectResult().catch(function (err) {
-  el('authGateError').textContent = 'No se pudo iniciar sesión: ' + err.message;
-  el('authGateError').classList.remove('hidden');
-});
 
 fsauth.onAuthStateChanged(function (user) {
   if (user && user.email === ALLOWED_EMAIL) {
@@ -2600,8 +2610,6 @@ function confirmDialog(title, subtitle, confirmLabel, onConfirm) {
   ]);
 }
 </script>
-
-
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
