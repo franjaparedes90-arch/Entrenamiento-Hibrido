@@ -1,0 +1,2613 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#4E7BAE">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Mi Entrenamiento">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="icon" href="icon-192.png">
+<style>
+:root{
+  --primary:#AFCBEF; --primary-dark:#4E7BAE; --primary-darker:#365D87; --primary-tint:#EAF2FC;
+  --bg:#F3F7FC; --card:#FFFFFF; --text:#2A3644; --text-soft:#6B7E92; --border:#E2EBF5;
+  --success:#4FAE7E; --success-tint:#E1F5EB; --warning:#E2A23B; --warning-tint:#FCEFDA;
+  --danger:#DD6B6B; --danger-tint:#FBE7E7; --shadow:0 6px 18px rgba(54,93,135,0.10);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--text);height:100%;overscroll-behavior-y:contain;}
+#app{max-width:520px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:var(--bg);position:relative;}
+.screen{display:none;flex-direction:column;min-height:100vh;}
+.screen.active{display:flex;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 10px;position:sticky;top:0;background:var(--bg);z-index:5;}
+.topbar .back{font-size:22px;color:var(--primary-dark);cursor:pointer;width:28px;background:none;border:none;padding:0;}
+.topbar .title{font-size:15px;font-weight:700;color:var(--text-soft);letter-spacing:.4px;text-transform:uppercase;}
+.topbar .icon{font-size:18px;color:var(--primary-dark);width:auto;text-align:right;background:none;border:none;cursor:pointer;}
+.content{padding:4px 18px 110px;flex:1;}
+.h1{font-size:26px;font-weight:800;margin:2px 0 2px;color:var(--text);}
+.h2{font-size:19px;font-weight:800;margin:0 0 2px;}
+.sub{color:var(--text-soft);font-size:13.5px;margin:0 0 14px;}
+.card{background:var(--card);border-radius:20px;padding:16px;box-shadow:var(--shadow);margin-bottom:14px;border:1px solid var(--border);}
+.pill-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.pill{background:var(--primary-tint);color:var(--primary-darker);font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:20px;}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:800;padding:4px 10px;border-radius:20px;letter-spacing:.3px;white-space:nowrap;}
+.badge-success{background:var(--success-tint);color:var(--success);}
+.badge-warning{background:var(--warning-tint);color:var(--warning);}
+.badge-danger{background:var(--danger-tint);color:var(--danger);}
+.badge-neutral{background:#EEF2F7;color:var(--text-soft);}
+.badge-info{background:var(--primary-tint);color:var(--primary-darker);}
+.btn{width:100%;border:none;border-radius:16px;font-weight:800;font-size:16px;padding:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn:disabled{opacity:.5;}
+.btn-primary{background:var(--primary-dark);color:#fff;box-shadow:0 8px 18px rgba(78,123,174,.35);}
+.btn-secondary{background:var(--primary-tint);color:var(--primary-darker);}
+.btn-outline{background:transparent;color:var(--primary-dark);border:2px solid var(--primary);}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn-ghost{background:transparent;color:var(--text-soft);font-weight:700;}
+.btn-sm{padding:11px;font-size:13.5px;border-radius:12px;}
+.btn-row{display:flex;gap:10px;}
+.stack{display:flex;flex-direction:column;gap:10px;}
+.sticky-cta{position:sticky;bottom:0;background:linear-gradient(to top, var(--bg) 65%, transparent);padding:14px 18px 22px;display:flex;flex-direction:column;gap:10px;}
+.ex-item{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid var(--border);gap:10px;}
+.ex-item:last-child{border-bottom:none;}
+.ex-name{font-weight:700;font-size:14.5px;}
+.ex-meta{color:var(--text-soft);font-size:12.5px;margin-top:2px;}
+.ex-suggestion{display:inline-block;margin-top:8px;font-size:11.5px;font-weight:800;padding:4px 10px;border-radius:20px;letter-spacing:.2px;}
+.ex-suggestion-increase{background:var(--success-tint);color:var(--success);}
+.ex-suggestion-hold{background:var(--primary-tint);color:var(--primary-darker);}
+.ex-suggestion-reduce{background:var(--warning-tint);color:var(--warning);}
+.ex-right{text-align:right;font-size:13px;color:var(--primary-darker);font-weight:700;flex-shrink:0;}
+.status-dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:6px;flex-shrink:0;}
+.dot-done{background:var(--success);} .dot-pending{background:#C9D6E3;} .dot-fail{background:var(--danger);} .dot-skip{background:var(--warning);}
+.timer-wrap{text-align:center;padding:26px 0 10px;}
+.timer-label{font-size:12.5px;letter-spacing:2px;color:var(--text-soft);font-weight:700;text-transform:uppercase;}
+.timer-big{font-size:64px;font-weight:800;color:var(--primary-darker);letter-spacing:1px;margin:4px 0;font-variant-numeric:tabular-nums;}
+.timer-big.small{font-size:46px;}
+.timer-ring{width:210px;height:210px;border-radius:50%;border:14px solid var(--primary-tint);border-top-color:var(--primary-dark);margin:10px auto;display:flex;align-items:center;justify-content:center;flex-direction:column;}
+.session-clock{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--primary-tint);color:var(--primary-darker);font-weight:800;padding:8px 16px;border-radius:20px;font-size:14px;margin:0 0 10px;}
+.set-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:14px;background:var(--card);border:1px solid var(--border);margin-bottom:8px;gap:10px;}
+.set-row.done{background:var(--success-tint);border-color:transparent;}
+.set-row.fail{background:var(--danger-tint);border-color:transparent;}
+.set-row .set-num{font-weight:800;color:var(--text-soft);width:58px;font-size:13px;flex-shrink:0;}
+.set-row .set-val{font-weight:700;font-size:14.5px;}
+.bottom-nav{display:flex;justify-content:space-around;align-items:center;padding:10px 6px 16px;background:var(--card);border-top:1px solid var(--border);position:sticky;bottom:0;}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;color:var(--text-soft);font-weight:700;background:none;border:none;cursor:pointer;}
+.nav-item.active{color:var(--primary-dark);}
+.nav-icon{font-size:19px;}
+.modal-overlay{position:fixed;inset:0;background:rgba(20,30,45,.45);display:flex;align-items:flex-end;justify-content:center;z-index:200;}
+.modal-overlay.hidden{display:none;}
+.modal-card{background:#fff;border-radius:22px 22px 0 0;padding:22px 20px 26px;width:100%;max-width:520px;box-shadow:0 -10px 30px rgba(0,0,0,.2);max-height:85vh;overflow-y:auto;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:12px;font-weight:800;color:var(--text-soft);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
+.field input, .field select, .field textarea{width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--border);font-size:15px;font-family:inherit;background:#fff;color:var(--text);}
+.stepper{display:flex;align-items:center;gap:10px;}
+.stepper button{width:42px;height:42px;border-radius:12px;border:none;background:var(--primary-tint);color:var(--primary-darker);font-size:20px;font-weight:800;}
+.stepper .val{flex:1;text-align:center;font-size:19px;font-weight:800;}
+.section-label{font-size:12px;font-weight:800;color:var(--primary-darker);text-transform:uppercase;letter-spacing:.6px;margin:18px 0 8px;}
+.divider{height:1px;background:var(--border);margin:14px 0;}
+.hint{font-size:12px;color:var(--text-soft);text-align:center;margin-top:8px;}
+.center{text-align:center;}
+.mb0{margin-bottom:0;}
+.warm-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;}
+.warm-item:last-child{border-bottom:none;}
+.check-circle{width:26px;height:26px;border-radius:50%;border:2px solid var(--primary);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:transparent;}
+.check-circle.done{background:var(--success);border-color:var(--success);color:#fff;}
+.wod-move{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px dashed var(--border);font-size:14.5px;}
+.wod-move:last-child{border-bottom:none;}
+.emom-current{background:var(--primary-dark);color:#fff;border-radius:18px;padding:20px;text-align:center;margin-bottom:14px;}
+.emom-current .lbl{font-size:12px;letter-spacing:1.5px;opacity:.85;text-transform:uppercase;}
+.emom-current .move{font-size:20px;font-weight:800;margin-top:6px;}
+.tabata-phase{font-size:22px;font-weight:800;text-align:center;padding:6px 0;}
+.tabata-work{color:var(--success);} .tabata-rest{color:var(--warning);}
+.fab-pause{position:fixed;top:14px;right:calc(50% - 260px + 16px);background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:9px 13px;font-size:12px;font-weight:800;color:var(--primary-darker);box-shadow:var(--shadow);cursor:pointer;z-index:20;}
+@media (max-width:560px){.fab-pause{right:16px;}}
+.history-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer;gap:10px;}
+.history-row:last-child{border-bottom:none;}
+.history-date{font-size:12px;color:var(--text-soft);font-weight:700;}
+.history-name{font-weight:800;font-size:14.5px;margin-top:2px;}
+.phase-card{border:2px solid transparent;}
+.phase-card.active{border-color:var(--primary);}
+.upload-box{border:2px dashed var(--primary);border-radius:16px;padding:26px 16px;text-align:center;color:var(--primary-darker);background:var(--primary-tint);font-weight:700;font-size:13.5px;cursor:pointer;}
+.kpi-row{display:flex;gap:10px;margin-bottom:14px;}
+.kpi{flex:1;background:var(--card);border-radius:14px;padding:12px;text-align:center;border:1px solid var(--border);}
+.kpi .num{font-size:20px;font-weight:800;color:var(--primary-darker);}
+.kpi .lbl{font-size:10.5px;color:var(--text-soft);font-weight:700;text-transform:uppercase;}
+.banner-warning{background:var(--warning-tint);border:1px solid #F0D19E;color:#7A5416;border-radius:16px;padding:14px;margin-bottom:14px;font-size:13.5px;}
+.banner-error{background:var(--danger-tint);border:1px solid #F0B8B8;color:#8A3A3A;border-radius:16px;padding:14px;margin-bottom:14px;font-size:13.5px;}
+.toggle{width:46px;height:26px;border-radius:20px;background:var(--primary);position:relative;flex-shrink:0;border:none;cursor:pointer;}
+.toggle::after{content:"";position:absolute;width:20px;height:20px;background:#fff;border-radius:50%;top:3px;right:3px;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:.15s;}
+.toggle.off{background:#D8E1EA;}
+.toggle.off::after{left:3px;right:auto;}
+.row-between{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.loading-overlay{position:fixed;inset:0;background:rgba(243,247,252,.85);display:flex;align-items:center;justify-content:center;z-index:500;font-weight:800;color:var(--primary-darker);}
+.loading-overlay.hidden{display:none;}
+.spinner{width:34px;height:34px;border-radius:50%;border:4px solid var(--primary-tint);border-top-color:var(--primary-dark);animation:spin 0.8s linear infinite;margin-right:10px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#2A3644;color:#fff;padding:12px 18px;border-radius:14px;font-size:13.5px;font-weight:700;z-index:600;box-shadow:0 6px 18px rgba(0,0,0,.3);max-width:85%;text-align:center;}
+.toast.hidden{display:none;}
+.reorder-handle{color:var(--text-soft);font-size:18px;cursor:grab;}
+.empty-state{text-align:center;color:var(--text-soft);padding:40px 20px;font-size:13.5px;}
+.hidden{display:none !important;}
+.auth-gate{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;}
+.auth-gate-inner{max-width:340px;width:100%;}
+.auth-gate-logo{font-size:44px;margin-bottom:6px;}
+.auth-gate-inner h1{font-size:21px;color:var(--primary-darker);margin:0 0 8px;}
+.auth-gate-inner p{font-size:13.5px;color:var(--text-soft);margin:0 0 22px;line-height:1.5;}
+.auth-gate-error{color:#B3413E;font-size:12.5px;margin-top:14px !important;line-height:1.5;}
+</style>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+<div id="authGate" class="auth-gate hidden">
+  <div class="auth-gate-inner">
+    <div class="auth-gate-logo">🏋️</div>
+    <h1>Mi Entrenamiento</h1>
+    <p>Iniciá sesión con tu cuenta de Google para ver y registrar tus entrenamientos.</p>
+    <button id="btnGoogleSignIn" class="btn btn-primary" onclick="signInWithGoogle_()">Iniciar sesión con Google</button>
+    <p id="authGateError" class="auth-gate-error hidden"></p>
+  </div>
+</div>
+<div id="app">
+
+  <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div>Cargando…</div>
+  <div id="toast" class="toast hidden"></div>
+  <button id="fabPause" class="fab-pause hidden" onclick="onPauseClick()">⏸ Pausar</button>
+
+  <!-- 1. HOY -->
+  <div class="screen" id="screen-hoy">
+    <div class="topbar"><span class="back"> </span><span class="title">Hoy</span>
+      <button class="icon" onclick="goScreen('ajustes')">⚙️</button></div>
+    <div class="content" id="hoyContent"></div>
+    <div class="sticky-cta" id="hoyCta"></div>
+    <div class="bottom-nav" id="bottomNavHoy"></div>
+  </div>
+
+  <!-- 2. DETALLE -->
+  <div class="screen" id="screen-detalle">
+    <div class="topbar"><button class="back" onclick="goScreen('hoy')">←</button><span class="title">Detalle del día</span><span class="icon"> </span></div>
+    <div class="content" id="detalleContent"></div>
+    <div class="sticky-cta" id="detalleCta"></div>
+  </div>
+
+  <!-- 3. EDITOR -->
+  <div class="screen" id="screen-editor">
+    <div class="topbar"><button class="back" onclick="goScreen('hoy')">←</button><span class="title">Editar sesión de hoy</span><span class="icon"> </span></div>
+    <div class="content" id="editorContent"></div>
+    <div class="sticky-cta">
+      <button class="btn btn-primary" onclick="onStartSessionClick()">Guardar y empezar</button>
+    </div>
+  </div>
+
+  <!-- 4. CALENTAMIENTO -->
+  <div class="screen" id="screen-calentamiento">
+    <div class="topbar"><span class="back"> </span><span class="title">Calentamiento</span>
+      <button class="icon" onclick="goToCurrentStep()">Saltar ⏭</button></div>
+    <div class="content" id="calentamientoContent"></div>
+    <div class="sticky-cta"><button class="btn btn-primary" onclick="goToCurrentStep()">Continuar</button></div>
+  </div>
+
+  <!-- 5. EJERCICIO ACTIVO -->
+  <div class="screen" id="screen-ejercicio">
+    <div class="topbar"><button class="back" onclick="confirmFinishEarly()">←</button><span class="title" id="ejercicioTitleBar">Ejercicio</span><span class="icon"> </span></div>
+    <div class="content" id="ejercicioContent"></div>
+    <div class="sticky-cta" id="ejercicioCta"></div>
+  </div>
+
+  <!-- 6. DESCANSO -->
+  <div class="screen" id="screen-descanso">
+    <div class="topbar"><span class="back"> </span><span class="title">Descanso</span><span class="icon"> </span></div>
+    <div class="content" id="descansoContent"></div>
+  </div>
+
+  <!-- 7. PAUSA -->
+  <div class="screen" id="screen-pausa">
+    <div class="topbar"><span class="back"> </span><span class="title">En pausa</span><span class="icon"> </span></div>
+    <div class="content" id="pausaContent"></div>
+    <div class="sticky-cta">
+      <button class="btn btn-danger" onclick="confirmFinishEarly()">Finalizar entrenamiento</button>
+      <button class="btn btn-primary" onclick="onResumeClick()">▶ Continuar</button>
+    </div>
+  </div>
+
+  <!-- 8. WOD (motor genérico para todos los tipos) -->
+  <div class="screen" id="screen-wod">
+    <div class="topbar"><span class="back"> </span><span class="title">WOD</span><span class="icon"> </span></div>
+    <div class="content" id="wodContent"></div>
+    <div class="sticky-cta" id="wodCta"></div>
+  </div>
+
+  <!-- 9. RESULTADO (completado / incompleto) -->
+  <div class="screen" id="screen-resultado">
+    <div class="content" id="resultadoContent" style="padding-top:40px;"></div>
+    <div class="sticky-cta"><button class="btn btn-primary" onclick="onCloseResultClick()">Finalizar</button></div>
+  </div>
+
+  <!-- 10. RECUPERACIÓN -->
+  <div class="screen" id="screen-recuperacion">
+    <div class="content" id="recuperacionContent" style="padding-top:50px;"></div>
+    <div class="sticky-cta" id="recuperacionCta"></div>
+  </div>
+
+  <!-- 11. HISTORIAL -->
+  <div class="screen" id="screen-historial">
+    <div class="topbar"><span class="back"> </span><span class="title">Historial</span><span class="icon"> </span></div>
+    <div class="content" id="historialContent"></div>
+    <div class="bottom-nav" id="bottomNavHistorial"></div>
+  </div>
+
+  <!-- 11b. HISTORIAL DETALLE -->
+  <div class="screen" id="screen-historial-detalle">
+    <div class="topbar"><button class="back" onclick="goScreen('historial')">←</button><span class="title" id="historialDetalleTitle">Detalle</span><span class="icon"> </span></div>
+    <div class="content" id="historialDetalleContent"></div>
+  </div>
+
+  <!-- 12. FASES -->
+  <div class="screen" id="screen-fases">
+    <div class="topbar"><span class="back"> </span><span class="title">Fases</span><span class="icon"> </span></div>
+    <div class="content" id="fasesContent"></div>
+    <div class="bottom-nav" id="bottomNavFases"></div>
+  </div>
+
+  <!-- 13. IMPORTAR CSV -->
+  <div class="screen" id="screen-importar">
+    <div class="topbar"><button class="back" onclick="goScreen('fases')">←</button><span class="title">Importar programación</span><span class="icon"> </span></div>
+    <div class="content" id="importarContent"></div>
+    <div class="sticky-cta" id="importarCta"></div>
+  </div>
+
+  <!-- 14. AJUSTES -->
+  <div class="screen" id="screen-ajustes">
+    <div class="topbar"><button class="back" onclick="goScreen('hoy')">←</button><span class="title">Ajustes</span><span class="icon"> </span></div>
+    <div class="content" id="ajustesContent"></div>
+    <div class="bottom-nav" id="bottomNavAjustes"></div>
+  </div>
+
+  <div id="modalRoot"></div>
+</div>
+
+<script>
+/* ============================================================================================
+ * Frontend de "Mi Entrenamiento". Todo vive en este único archivo (limitación de HTML Service).
+ * Convención: las funciones que llaman al backend usan gs('nombreFuncion', args...) y devuelven
+ * una Promise con el "data" ya desempaquetado (o lanzan Error con el mensaje legible del backend).
+ * ==========================================================================================*/
+
+var APP = {
+  config: { soundOn: true, vibrationOn: true },
+  today: null,
+  currentSessionId: null,
+  sessionState: null,
+  editorDraft: null,
+  timers: { global: null, rest: null, wod: null },
+  wod: { type: null, structure: null, startedAt: null, elapsedBeforePause: 0 },
+  historyCache: null,
+  phasesCache: null,
+  csvText: null,
+  audioCtx: null
+};
+
+/* ---------------- Firebase: inicialización, autenticación y backend (Firestore) ----------------
+ * Esta versión habla directo con Firestore desde el navegador — no hay ningún servidor propio ni
+ * Apps Script en esta app. La fuente de verdad es Firestore (proyecto "entrenamiento-hibrido-cdf81").
+ * Acceso restringido: solo la cuenta de Google franjaparedes90@gmail.com puede leer/escribir
+ * (reforzado también en las Reglas de Seguridad de Firestore, no solo aquí). */
+
+var firebaseConfig = {
+  "apiKey": "AIzaSyDvJxt8G6w0h-9wLmGlJhZdSx79vpNiFvg",
+  "authDomain": "entrenamiento-hibrido-cdf81.firebaseapp.com",
+  "projectId": "entrenamiento-hibrido-cdf81",
+  "storageBucket": "entrenamiento-hibrido-cdf81.firebasestorage.app",
+  "messagingSenderId": "760642756834",
+  "appId": "1:760642756834:web:199c8e2290e3f31b45febb",
+  "measurementId": "G-096EYM75PY"
+};
+
+firebase.initializeApp(firebaseConfig);
+var fsdb = firebase.firestore();
+var fsauth = firebase.auth();
+var ALLOWED_EMAIL = 'franjaparedes90@gmail.com';
+
+function signInWithGoogle_() {
+  el('authGateError').classList.add('hidden');
+  var provider = new firebase.auth.GoogleAuthProvider();
+  fsauth.signInWithRedirect(provider);
+}
+
+fsauth.getRedirectResult().catch(function (err) {
+  el('authGateError').textContent = 'No se pudo iniciar sesión: ' + err.message;
+  el('authGateError').classList.remove('hidden');
+});
+
+fsauth.onAuthStateChanged(function (user) {
+  if (user && user.email === ALLOWED_EMAIL) {
+    el('authGate').classList.add('hidden');
+    boot();
+  } else if (user) {
+    fsauth.signOut();
+    el('authGate').classList.remove('hidden');
+    el('authGateError').textContent = 'Esta app es solo para ' + ALLOWED_EMAIL + '. Iniciá sesión con esa cuenta de Google.';
+    el('authGateError').classList.remove('hidden');
+  } else {
+    el('authGate').classList.remove('hidden');
+  }
+});
+
+/* ============================================================================================
+ * firestore-backend.js — reemplaza toda la lógica de los .gs de Apps Script, corriendo en el
+ * navegador y hablando directo con Firestore. Ningún archivo .gs se usa en esta versión.
+ *
+ * Contrato: cada función pública se cuelga de FS.<nombre> y devuelve una Promise que resuelve
+ * con los mismos datos (mismos nombres de campo, snake_case) que devolvía la versión de Apps
+ * Script — así el resto de JavaScript.html (pantallas, temporizadores, editor) no cambia nada.
+ *
+ * Regla de diseño para evitar índices compuestos de Firestore (que no se pueden crear sin pasar
+ * por la consola y podrían romper la app en producción sin previo aviso): cada consulta usa como
+ * máximo UN filtro de igualdad. Si se necesita filtrar por más de un campo, se trae el conjunto
+ * (siempre pequeño para una app personal) y se filtra en JavaScript, igual que hacía la versión
+ * de Sheets con findWhere_.
+ * ==========================================================================================*/
+
+/* ============================================================================================
+ * firestore-backend.js — reemplaza toda la lógica de los .gs de Apps Script, corriendo en el
+ * navegador y hablando directo con Firestore. Ningún archivo .gs se usa en esta versión.
+ *
+ * Contrato: cada función pública se cuelga de FS.<nombre> y devuelve una Promise que resuelve
+ * con los mismos datos (mismos nombres de campo, snake_case) que devolvía la versión de Apps
+ * Script — así el resto de JavaScript.html (pantallas, temporizadores, editor) no cambia nada.
+ *
+ * Regla de diseño para evitar índices compuestos de Firestore (que no se pueden crear sin pasar
+ * por la consola y podrían romper la app en producción sin previo aviso): cada consulta usa como
+ * máximo UN filtro de igualdad. Si se necesita filtrar por más de un campo, se trae el conjunto
+ * (siempre pequeño para una app personal) y se filtra en JavaScript, igual que hacía la versión
+ * de Sheets con findWhere_.
+ * ==========================================================================================*/
+
+/* ============================================================================================
+ * firestore-backend.js — reemplaza toda la lógica de los .gs de Apps Script, corriendo en el
+ * navegador y hablando directo con Firestore. Ningún archivo .gs se usa en esta versión.
+ *
+ * Contrato: cada función pública se cuelga de FS.<nombre> y devuelve una Promise que resuelve
+ * con los mismos datos (mismos nombres de campo, snake_case) que devolvía la versión de Apps
+ * Script — así el resto de JavaScript.html (pantallas, temporizadores, editor) no cambia nada.
+ *
+ * Regla de diseño para evitar índices compuestos de Firestore (que no se pueden crear sin pasar
+ * por la consola y podrían romper la app en producción sin previo aviso): cada consulta usa como
+ * máximo UN filtro de igualdad. Si se necesita filtrar por más de un campo, se trae el conjunto
+ * (siempre pequeño para una app personal) y se filtra en JavaScript, igual que hacía la versión
+ * de Sheets con findWhere_.
+ * ==========================================================================================*/
+
+var FS = {};
+
+function col_(name) { return fsdb.collection(name); }
+
+function uuid_() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+function nowIso_() { return new Date().toISOString(); }
+function todayDateString_() {
+  var d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+/* ---------------- WOD por día de calendario real (pedido de Javier, fase Volumen/Hipertrofia:
+ * "no importa qué grupo toque, si es lunes/miércoles/viernes se hace WOD") ----------------
+ * phase.wod_weekdays es un array de días ISO (1=lunes ... 7=domingo), opcional. Si la fase no lo
+ * trae (undefined/null/vacío), el comportamiento es el de siempre: WOD todos los días que el
+ * programa lo indique — no rompe nada de lo ya construido. nowDate es inyectable para tests. */
+function isWodDayToday_(phase, nowDate) {
+  var days = phase && phase.wod_weekdays;
+  if (!days || !days.length) return true;
+  var d = nowDate || new Date();
+  var jsDay = d.getDay(); // 0=domingo..6=sábado
+  var isoWeekday = jsDay === 0 ? 7 : jsDay; // 1=lunes..7=domingo
+  return days.indexOf(isoWeekday) !== -1;
+}
+
+/* ---------------- Fases / rotación ---------------- */
+
+function getActivePhase_() {
+  return col_('phases').where('status', '==', 'ACTIVE').get().then(function (snap) {
+    if (snap.empty) throw new Error('No hay ninguna fase activa. Crea una importando un CSV desde Fases.');
+    var d = snap.docs[0];
+    return Object.assign({ id: d.id }, d.data());
+  });
+}
+
+function getProgramDayFor_(phaseId, weekNumber, dayNumber) {
+  return col_('programDays').where('phase_id', '==', phaseId).get().then(function (snap) {
+    var match = null;
+    snap.forEach(function (d) {
+      var data = d.data();
+      if (Number(data.week_number) === Number(weekNumber) && Number(data.day_number) === Number(dayNumber)) {
+        match = Object.assign({ id: d.id }, data);
+      }
+    });
+    return match;
+  });
+}
+
+function advanceRotation_(phaseId) {
+  return col_('phases').doc(phaseId).get().then(function (snap) {
+    var phase = snap.data();
+    var day = Number(phase.current_day_number) + 1;
+    var week = Number(phase.current_week_number);
+    if (day > 6) { day = 1; week += 1; }
+    return col_('phases').doc(phaseId).update({
+      current_day_number: day,
+      current_week_number: week,
+      completed_sessions_count: Number(phase.completed_sessions_count || 0) + 1,
+      updated_at: nowIso_()
+    });
+  });
+}
+
+function setRotationPosition_(phaseId, weekNumber, dayNumber) {
+  return col_('phases').doc(phaseId).update({
+    current_week_number: weekNumber,
+    current_day_number: dayNumber,
+    completed_sessions_count: (weekNumber - 1) * 6 + (dayNumber - 1),
+    updated_at: nowIso_()
+  });
+}
+
+/* ---------------- Programa / vista Hoy ---------------- */
+
+/* ---------------- RM por movimiento (2026-08-26: desacoplado de la fase puntual) ----------------
+ * Decisión con Javier: el RM de cada movimiento (SNATCH, BENCH_PRESS, ...) ya NO vive atado al
+ * documento de una fase específica (antes se filtraba por phase_id, así que cada fase nueva volvía
+ * a leer el RM hardcodeado del CSV con el que se creó, aunque el RM real ya hubiera cambiado).
+ * Ahora `rms` es una colección única por movimiento que cruza las 3 fases y todos los ciclos: se
+ * toma siempre el registro más reciente por `effective_date` (con `created_at` como desempate),
+ * sin importar en qué fase se escribió. */
+function getAllCurrentRms_() {
+  return col_('rms').get().then(function (snap) {
+    var byMovement = {};
+    snap.forEach(function (d) {
+      var r = d.data();
+      var cur = byMovement[r.movement_key];
+      var isNewer = !cur ||
+        String(r.effective_date) > String(cur.effective_date) ||
+        (String(r.effective_date) === String(cur.effective_date) && String(r.created_at || '') >= String(cur.created_at || ''));
+      if (isNewer) byMovement[r.movement_key] = r;
+    });
+    return byMovement;
+  });
+}
+
+function computePlannedWeight_(programExercise, rmsByMovement) {
+  var type = programExercise.weight_type;
+  if (type === 'ABSOLUTE_KG') return Number(programExercise.weight_value) || 0;
+  if (type === 'PERCENT_RM') {
+    var rm = rmsByMovement[programExercise.percent_of_movement];
+    if (!rm) return 0;
+    var pct = Number(programExercise.weight_value) || 0;
+    return Math.round(((Number(rm.value_kg) * pct) / 100) * 2) / 2;
+  }
+  if (type === 'BODYWEIGHT') return 'Peso corporal';
+  return null;
+}
+
+function getWarmupItems_(warmupGroupId) {
+  if (!warmupGroupId) return Promise.resolve(null);
+  return col_('warmups').doc(warmupGroupId).get().then(function (snap) {
+    if (!snap.exists) return null;
+    var d = snap.data();
+    return {
+      MOVILIDAD_ARTICULAR: d.MOVILIDAD_ARTICULAR || [],
+      ACTIVACION_GENERAL: d.ACTIVACION_GENERAL || [],
+      ACTIVACION_ESPECIFICA: d.ACTIVACION_ESPECIFICA || []
+    };
+  });
+}
+
+function findActiveSession_() {
+  return col_('sessions').where('status', 'in', ['IN_PROGRESS', 'PAUSED']).get().then(function (snap) {
+    if (snap.empty) return null;
+    var d = snap.docs[0];
+    return Object.assign({ id: d.id }, d.data());
+  });
+}
+
+function computeActiveElapsedSeconds_(session) {
+  var accumulated = Number(session.active_seconds_accumulated) || 0;
+  if (session.status === 'IN_PROGRESS' && session.last_resume_time) {
+    var deltaMs = new Date() - new Date(session.last_resume_time);
+    accumulated += Math.max(0, Math.round(deltaMs / 1000));
+  }
+  return accumulated;
+}
+
+function summarizeSessionForRecovery_(session) {
+  var exercises = (session.exercises || []).slice().sort(function (a, b) { return Number(a.order) - Number(b.order); });
+  var lastTouched = null;
+  exercises.forEach(function (ex) { if (ex.status !== 'PENDING' && ex.status !== 'NOT_STARTED') lastTouched = ex; });
+  var isToday = session.date === todayDateString_();
+  return {
+    sessionId: session.id,
+    dayName: session.day_name,
+    startTime: session.start_time,
+    lastExerciseName: lastTouched ? lastTouched.exercise_name : (exercises[0] ? exercises[0].exercise_name : null),
+    isStale: !isToday,
+    activeElapsedSeconds: computeActiveElapsedSeconds_(session)
+  };
+}
+
+/* ---------------- Motor de progresión (reps + peso + RIR vs. rango objetivo) ----------------
+ * Regla de Javier (sección 13 de sus normas): la progresión NO se basa solo en "subir peso cada
+ * semana" — se basa en comparar lo que realmente se hizo la última vez (reps logradas + RIR real)
+ * contra el rango objetivo de esa semana. Nunca sugiere buscar el fallo sistemáticamente. */
+
+function getRecentPerformanceForExercise_(exerciseName) {
+  // 2026-08-26: ya NO se filtra por phase_id — el historial de un ejercicio cruza las 3 fases y
+  // todos los ciclos (así el Snatch de Fuerza-ciclo-2 encuentra el Snatch de Fuerza-ciclo-1, aunque
+  // en el medio hayan pasado Volumen y Definición). Sin filtro de igualdad en esta consulta (cero
+  // sigue cumpliendo la regla de "máximo un filtro"), se trae toda la colección y se filtra en JS.
+  return col_('sessions').get().then(function (snap) {
+    var candidates = [];
+    snap.forEach(function (d) {
+      var s = d.data();
+      if (s.status !== 'COMPLETED' && s.status !== 'INCOMPLETE') return;
+      (s.exercises || []).forEach(function (ex) {
+        if (ex.exercise_name === exerciseName && (ex.sets || []).length > 0) {
+          candidates.push({ sortKey: String(s.date || '') + String(s.created_at || ''), ex: ex });
+        }
+      });
+    });
+    if (!candidates.length) return null;
+    candidates.sort(function (a, b) { return b.sortKey.localeCompare(a.sortKey); });
+    return candidates[0].ex;
+  });
+}
+
+/* 2026-08-26: peso máximo realmente completado en el registro anterior de un ejercicio (cualquier
+ * fase/ciclo) — esto es lo que ahora alimenta el "peso de referencia" dinámico de accesorios que se
+ * repiten por nombre (anclas incluidas, ver getTodayView). Solo cuenta series COMPLETED con un
+ * weight_actual numérico — un PC ("Peso corporal") o una serie fallada no aportan una referencia de
+ * carga válida. */
+function maxCompletedWeightActual_(ex) {
+  if (!ex) return null;
+  var sets = (ex.sets || []).filter(function (s) {
+    return s.status === 'COMPLETED' && s.weight_actual !== undefined && s.weight_actual !== null && s.weight_actual !== '' && !isNaN(Number(s.weight_actual));
+  });
+  if (!sets.length) return null;
+  return Math.max.apply(null, sets.map(function (s) { return Number(s.weight_actual); }));
+}
+
+function computeProgressionSuggestion_(lastEx, plannedExercise) {
+  if (!lastEx) return { action: 'none', reason: 'Todavía no hay un registro previo de este ejercicio (en ninguna fase/ciclo) — se arranca con el peso planificado.' };
+  var sets = (lastEx.sets || []).filter(function (s) { return s.status === 'COMPLETED' || s.status === 'FAILED'; });
+  if (!sets.length) return { action: 'none', reason: 'El registro anterior no tiene series completas.' };
+
+  var maxReps = (plannedExercise.max_reps !== undefined && plannedExercise.max_reps !== '' && plannedExercise.max_reps !== null) ? Number(plannedExercise.max_reps) : null;
+  var minReps = (plannedExercise.min_reps !== undefined && plannedExercise.min_reps !== '' && plannedExercise.min_reps !== null) ? Number(plannedExercise.min_reps) : null;
+  var targetRirMin = (plannedExercise.target_rir_min !== undefined && plannedExercise.target_rir_min !== '' && plannedExercise.target_rir_min !== null) ? Number(plannedExercise.target_rir_min) : null;
+
+  var anyFailedOrZeroRir = sets.some(function (s) {
+    return s.status === 'FAILED' || (s.rir_actual !== undefined && s.rir_actual !== '' && Number(s.rir_actual) === 0);
+  });
+  if (anyFailedOrZeroRir) {
+    return { action: 'reduce', reason: 'La última vez hubo una serie fallada o a RIR 0 — no se sugiere subir peso; considerá mantener o bajar carga/volumen.' };
+  }
+
+  if (minReps !== null && sets.every(function (s) { return Number(s.reps_actual) < minReps; })) {
+    return { action: 'reduce', reason: 'La última vez no llegaste al piso del rango de reps en ninguna serie — considerá bajar la carga.' };
+  }
+
+  var allHitMax = maxReps !== null && sets.every(function (s) { return Number(s.reps_actual) >= maxReps; });
+  var atOrAboveTargetRir = targetRirMin === null || sets.every(function (s) {
+    return s.rir_actual === undefined || s.rir_actual === '' || s.rir_actual === null || Number(s.rir_actual) >= targetRirMin;
+  });
+  if (allHitMax && atOrAboveTargetRir) {
+    return { action: 'increase', reason: 'La última vez completaste todas las series en el techo del rango de reps manteniendo el RIR objetivo — subí el peso y volvé al piso del rango (doble progresión).' };
+  }
+
+  return { action: 'hold', reason: 'Mantené el mismo peso hasta completar el rango completo de reps en todas las series con el RIR objetivo.' };
+}
+
+FS.getTodayView = function () {
+  return getActivePhase_().then(function (phase) {
+    return getProgramDayFor_(phase.id, phase.current_week_number, phase.current_day_number).then(function (programDay) {
+      return findActiveSession_().then(function (activeSession) {
+        var weekPlanForToday = (phase.week_plan || []).filter(function (w) { return Number(w.week_number) === Number(phase.current_week_number); })[0] || null;
+        var view = {
+          phase: { id: phase.id, name: phase.name, weeks: Number(phase.weeks), order: phase.order || null, priority: phase.priority || null },
+          weekNumber: Number(phase.current_week_number),
+          dayNumber: Number(phase.current_day_number),
+          weekPlan: weekPlanForToday,
+          programDay: null,
+          exercises: [],
+          warmup: null,
+          wod: null,
+          recoverableSession: activeSession ? summarizeSessionForRecovery_(activeSession) : null
+        };
+        if (!programDay) return view;
+        view.programDay = { id: programDay.id, day_name: programDay.day_name };
+        return getAllCurrentRms_().then(function (rmsByMovement) {
+          var exercises = (programDay.exercises || []).slice()
+            .sort(function (a, b) { return Number(a.order) - Number(b.order); })
+            .map(function (e) { return Object.assign({}, e); });
+          return Promise.all(exercises.map(function (ex) {
+            return getRecentPerformanceForExercise_(ex.exercise_name).then(function (lastEx) {
+              ex.progression_suggestion = computeProgressionSuggestion_(lastEx, ex);
+              // 2026-08-26: el PRINCIPAL sigue saliendo de %RM (RM ahora global, ver arriba). Para
+              // cualquier ACCESORIO —incluidas las anclas alternantes de Volumen/Definición— el
+              // "peso de referencia" que se muestra antes de empezar pasa a ser el último peso que
+              // realmente registraste con ese nombre exacto de ejercicio (en cualquier fase/ciclo),
+              // no el valor fijo que quedó escrito en la ficha/CSV original. Si todavía no hay
+              // ningún registro de ese ejercicio, se usa el valor de la ficha como punto de partida
+              // (única vez que el CSV manda). Decisión con Javier, ver reglas-de-programacion.
+              if (ex.category === 'PRINCIPAL') {
+                ex.computed_weight = computePlannedWeight_(ex, rmsByMovement);
+                ex.computed_weight_source = 'RM';
+              } else {
+                var dynamicWeight = (ex.weight_type !== 'BODYWEIGHT') ? maxCompletedWeightActual_(lastEx) : null;
+                if (dynamicWeight !== null) {
+                  ex.computed_weight = dynamicWeight;
+                  ex.computed_weight_source = 'LAST_LOGGED';
+                } else {
+                  ex.computed_weight = computePlannedWeight_(ex, rmsByMovement);
+                  ex.computed_weight_source = 'PLAN';
+                }
+              }
+            });
+          })).then(function () {
+            view.exercises = exercises;
+            view.wod = (programDay.wod && isWodDayToday_(phase)) ? programDay.wod : null;
+            view.wodScheduledButNotToday = !!(programDay.wod && !isWodDayToday_(phase));
+            return getWarmupItems_(programDay.warmup_group_id).then(function (warmup) {
+              view.warmup = warmup;
+              return view;
+            });
+          });
+        });
+      });
+    });
+  });
+};
+
+FS.getRmsView = function () {
+  // 2026-08-26: los RM ya no son por fase — se listan los vigentes de cualquier movimiento, sin
+  // importar qué fase esté activa ahora mismo.
+  return getAllCurrentRms_().then(function (rms) {
+    return Object.keys(rms).map(function (k) { return { movement_key: k, value_kg: Number(rms[k].value_kg), effective_date: rms[k].effective_date }; });
+  });
+};
+
+FS.updateRm = function (movementKey, valueKg, note) {
+  // Sobrescritura manual — siempre queda como el registro más reciente de ese movimiento (pisa
+  // tanto el valor sembrado por CSV como una captura automática de semana de test, si las hubiera).
+  return getActivePhase_().then(function (phase) {
+    return col_('rms').add({
+      phase_id: (phase && phase.id) || '', movement_key: movementKey, value_kg: Number(valueKg),
+      effective_date: todayDateString_(), note: note || '', created_at: nowIso_(), source: 'MANUAL'
+    }).then(function () { return true; });
+  });
+};
+
+FS.getExerciseCatalog = function () {
+  return col_('exercisesCatalog').doc('list').get().then(function (snap) {
+    var names = snap.exists ? (snap.data().names || []) : [];
+    return names.slice().sort();
+  });
+};
+
+FS.getConfig = function () {
+  return col_('config').doc('settings').get().then(function (snap) {
+    var d = snap.exists ? snap.data() : {};
+    return { soundOn: d.sound_on !== false, vibrationOn: d.vibration_on !== false, appName: d.app_name || 'Mi Entrenamiento' };
+  });
+};
+
+FS.setConfig = function (key, value) {
+  var allowed = ['sound_on', 'vibration_on', 'app_name', 'phase_rotation', 'phase_templates'];
+  if (allowed.indexOf(key) === -1) throw new Error('Ajuste no reconocido: ' + key);
+  var patch = {}; patch[key] = value;
+  return col_('config').doc('settings').set(patch, { merge: true }).then(function () { return true; });
+};
+
+/* ---------------- Plantillas de periodización por tipo de fase (normas de Javier, sección 3/4/5) ----------------
+ * Valores por defecto = exactamente lo que Javier especificó. Configurable sin tocar código:
+ * gs('setConfig', 'phase_templates', {...}) sobrescribe esto (merge por config.settings). Estos
+ * valores son la referencia para armar el CSV de cada fase — no se aplican solos, alguien (Javier
+ * o Claude) los usa para generar las filas PROGRAM_EXERCISE/PHASE_WEEK de cada semana. */
+
+var DEFAULT_PHASE_TEMPLATES_ = {
+  FUERZA: {
+    principal: { minReps: 3, maxReps: 5, restSeconds: [180, 300], progressionMethod: 'LINEAR' },
+    accesorio: { minReps: 6, maxReps: 10, restSeconds: [90, 150], progressionMethod: 'DOUBLE_PROGRESSION' },
+    weeks: [
+      { week: 1, scheme: '4x5', targetRirMin: 3, targetRirMax: 3, deload: false },
+      { week: 2, scheme: '4x5', targetRirMin: 2, targetRirMax: 3, deload: false },
+      { week: 3, scheme: '5x4', targetRirMin: 2, targetRirMax: 2, deload: false },
+      { week: 4, scheme: '5x4', targetRirMin: 1, targetRirMax: 2, deload: false },
+      { week: 5, scheme: '5x3', targetRirMin: 1, targetRirMax: 1, deload: false },
+      { week: 6, scheme: '3x5', targetRirMin: 3, targetRirMax: 4, deload: true },
+      { week: 7, scheme: 'TEST_RM', targetRirMin: null, targetRirMax: null, deload: false, isRmTest: true }
+    ]
+  },
+  VOLUMEN: {
+    principal: { minReps: 6, maxReps: 10, restSeconds: [120, 180], progressionMethod: 'DOUBLE_PROGRESSION' },
+    accesorio: { minReps: 8, maxReps: 15, restSeconds: [60, 120], progressionMethod: 'DOUBLE_PROGRESSION' },
+    weeks: [
+      { week: 1, scheme: '3x10', targetRirMin: 3, targetRirMax: 3, deload: false },
+      { week: 2, scheme: '4x10', targetRirMin: 2, targetRirMax: 3, deload: false },
+      { week: 3, scheme: '4x8-10', targetRirMin: 2, targetRirMax: 2, deload: false },
+      { week: 4, scheme: '4x8', targetRirMin: 1, targetRirMax: 2, deload: false },
+      { week: 5, scheme: '4-5x8', targetRirMin: 1, targetRirMax: 1, deload: false },
+      { week: 6, scheme: '2-3x10', targetRirMin: 3, targetRirMax: 4, deload: true },
+      { week: 7, scheme: 'TEST_RM', targetRirMin: null, targetRirMax: null, deload: false, isRmTest: true }
+    ]
+  },
+  DEFINICION: {
+    principal: { minReps: 5, maxReps: 8, restSeconds: [120, 180], progressionMethod: 'DOUBLE_PROGRESSION' },
+    accesorio: { minReps: 8, maxReps: 15, restSeconds: [60, 120], progressionMethod: 'DOUBLE_PROGRESSION' },
+    weeks: [
+      { week: 1, scheme: '3x8', targetRirMin: 3, targetRirMax: 3, deload: false },
+      { week: 2, scheme: '4x8', targetRirMin: 2, targetRirMax: 3, deload: false },
+      { week: 3, scheme: '4x6-8', targetRirMin: 2, targetRirMax: 2, deload: false },
+      { week: 4, scheme: '4x6-8', targetRirMin: 1, targetRirMax: 2, deload: false },
+      { week: 5, scheme: '3-4x6', targetRirMin: 1, targetRirMax: 1, deload: false },
+      { week: 6, scheme: '2-3x8', targetRirMin: 3, targetRirMax: 4, deload: true },
+      { week: 7, scheme: 'TEST_RM', targetRirMin: null, targetRirMax: null, deload: false, isRmTest: true }
+    ]
+  }
+};
+
+FS.getPhaseTemplates = function () {
+  return col_('config').doc('settings').get().then(function (snap) {
+    var d = snap.exists ? snap.data() : {};
+    return d.phase_templates || DEFAULT_PHASE_TEMPLATES_;
+  });
+};
+
+/* ---------------- Sesiones (ejercicios y series embebidos en el propio documento) ---------------- */
+
+function getSessionDoc_(sessionId) {
+  return col_('sessions').doc(sessionId).get().then(function (snap) {
+    if (!snap.exists) throw new Error('No se encontró la sesión ' + sessionId + '.');
+    return Object.assign({ id: snap.id }, snap.data());
+  });
+}
+
+function saveSession_(session) {
+  var patch = Object.assign({}, session);
+  delete patch.id;
+  patch.updated_at = nowIso_();
+  return col_('sessions').doc(session.id).set(patch).then(function () { return session; });
+}
+
+function findSessionBySessionExerciseId_(sessionExerciseId) {
+  // Solo puede haber una sesión IN_PROGRESS/PAUSED a la vez, y logSet/skipExercise solo se llaman
+  // desde la UI sobre el ejercicio actual de esa sesión activa.
+  return findActiveSession_().then(function (session) {
+    if (!session) throw new Error('No hay una sesión activa.');
+    var ex = (session.exercises || []).filter(function (e) { return e.id === sessionExerciseId; })[0];
+    if (!ex) throw new Error('El ejercicio no pertenece a la sesión activa.');
+    return session;
+  });
+}
+
+function findCurrentPointer_(exercises) {
+  for (var i = 0; i < exercises.length; i++) {
+    var ex = exercises[i];
+    if (ex.status === 'COMPLETED' || ex.status === 'SKIPPED') continue;
+    var logged = (ex.sets || []).filter(function (s) { return s.status === 'COMPLETED' || s.status === 'FAILED'; }).map(function (s) { return Number(s.set_number); });
+    var nextSet = 1;
+    while (logged.indexOf(nextSet) !== -1) nextSet++;
+    if (nextSet > Number(ex.sets_planned)) continue;
+    return { exerciseId: ex.id, setNumber: nextSet };
+  }
+  return null;
+}
+
+FS.getSessionState = function (sessionId) {
+  return getSessionDoc_(sessionId).then(function (session) {
+    var exercises = (session.exercises || []).slice().sort(function (a, b) { return Number(a.order) - Number(b.order); });
+    return {
+      session: session,
+      activeElapsedSeconds: computeActiveElapsedSeconds_(session),
+      exercises: exercises,
+      wod: session.wod || null,
+      current: findCurrentPointer_(exercises),
+      rest: (session.rest && session.rest.resting) ? session.rest : null
+    };
+  });
+};
+
+FS.startSession = function (planExercises, planWod, sessionNote) {
+  return findActiveSession_().then(function (existing) {
+    if (existing) throw new Error('Ya tienes una sesión en curso (' + existing.day_name + '). Continúa o finalízala antes de empezar otra.');
+    return getActivePhase_().then(function (phase) {
+      return getProgramDayFor_(phase.id, phase.current_week_number, phase.current_day_number).then(function (programDay) {
+        var dayName = programDay ? programDay.day_name : ('Día ' + phase.current_day_number);
+        var sessionId = uuid_();
+        var exercises = (planExercises || []).map(function (ex, idx) {
+          return {
+            id: uuid_(), program_exercise_id: ex.programExerciseId || '', order: idx + 1, exercise_name: ex.exerciseName,
+            sets_planned: ex.sets, reps_planned: ex.reps, weight_planned: ex.weight, weight_type: ex.weightType,
+            percent_of_movement: ex.percentOfMovement || '', rest_planned_seconds: ex.restSeconds || 0,
+            unit: ex.unit || 'kg', status: 'PENDING', notes: ex.notes || '', sets: [],
+            // Periodización por RIR (normas de Javier, sección 11 "EXERCISE_PLAN"): se copian al
+            // snapshot de la sesión para que el motor de progresión pueda comparar contra ellos
+            // más adelante sin depender de que el programDay original no haya cambiado.
+            category: ex.category || 'PRINCIPAL', min_reps: ex.minReps != null ? ex.minReps : null,
+            max_reps: ex.maxReps != null ? ex.maxReps : null, target_rir_min: ex.targetRirMin != null ? ex.targetRirMin : null,
+            target_rir_max: ex.targetRirMax != null ? ex.targetRirMax : null, progression_method: ex.progressionMethod || 'NONE'
+          };
+        });
+        var session = {
+          phase_id: phase.id, program_day_id: programDay ? programDay.id : '', date: todayDateString_(),
+          week_number: phase.current_week_number, day_number: phase.current_day_number, day_name: dayName,
+          status: 'IN_PROGRESS', start_time: nowIso_(), end_time: '', active_seconds_accumulated: 0,
+          last_resume_time: nowIso_(), paused_seconds: 0, session_note: sessionNote || '', rest: null,
+          exercises: exercises,
+          wod: planWod ? { wod_type: planWod.wodType, structure: planWod.structure || {}, status: 'NOT_STARTED', result: null, started_at: '', finished_at: '', note: '' } : null,
+          created_at: nowIso_(), updated_at: nowIso_()
+        };
+        return col_('sessions').doc(sessionId).set(session).then(function () { return { sessionId: sessionId }; });
+      });
+    });
+  });
+};
+
+function sessionCompletionSummary_(session) {
+  var exercises = session.exercises || [];
+  var wod = session.wod || null;
+  var exercisesDone = exercises.filter(function (e) { return e.status === 'COMPLETED' || e.status === 'SKIPPED'; }).length;
+  var allExercisesDone = exercisesDone === exercises.length;
+  var wodDone = !wod || wod.status === 'COMPLETED' || wod.status === 'SKIPPED' || wod.status === 'PARTIAL';
+  return { exercisesTotal: exercises.length, exercisesDone: exercisesDone, allExercisesDone: allExercisesDone, wod: wod, wodDone: wodDone, isFullyComplete: allExercisesDone && wodDone };
+}
+
+function maybeAutoCompleteSession_(sessionId) {
+  return getSessionDoc_(sessionId).then(function (session) {
+    var summary = sessionCompletionSummary_(session);
+    if (summary.isFullyComplete) return FS.finishSession(sessionId, '');
+    return null;
+  });
+}
+
+/* ---------------- Ciclo de fases: felicitación + sugerencia de la fase siguiente ----------------
+ * Rotación por defecto acordada con Javier (confirmada vía pregunta explícita "se repite sin fin"):
+ * Fuerza -> Volumen/Hipertrofia -> Definición -> vuelta a Fuerza. Cada fase dura 7 semanas (6 de
+ * progresión real + 1 de test de RM, ver DEFAULT_PHASE_TEMPLATES_). Los nombres deben coincidir
+ * (sin distinguir mayúsculas/tildes-case, ver normalizePhaseName_) con el nombre real que se le
+ * ponga a cada fase al crearla. Configurable sin tocar código guardando un array en
+ * config.settings.phase_rotation. */
+
+var DEFAULT_PHASE_ROTATION_ = ['Fuerza', 'Volumen/Hipertrofia', 'Definición'];
+
+function getPhaseRotation_() {
+  return col_('config').doc('settings').get().then(function (snap) {
+    var d = snap.exists ? snap.data() : {};
+    return (d.phase_rotation && d.phase_rotation.length) ? d.phase_rotation : DEFAULT_PHASE_ROTATION_;
+  });
+}
+
+function normalizePhaseName_(name) { return String(name || '').trim().toLowerCase(); }
+
+function suggestNextPhase_(currentName, rotation) {
+  var norm = normalizePhaseName_(currentName);
+  var idx = -1;
+  for (var i = 0; i < rotation.length; i++) {
+    if (normalizePhaseName_(rotation[i]) === norm) { idx = i; break; }
+  }
+  if (idx === -1) return null; // el nombre de la fase no está en la rotación conocida — no se sugiere nada, no se rompe nada.
+  return rotation[(idx + 1) % rotation.length];
+}
+
+FS.logSet = function (sessionExerciseId, setNumber, weightActual, repsActual, status, note, rirActual) {
+  return findSessionBySessionExerciseId_(sessionExerciseId).then(function (session) {
+    if (session.status !== 'IN_PROGRESS') throw new Error('La sesión no está activa (está ' + session.status + ').');
+    var ex = session.exercises.filter(function (e) { return e.id === sessionExerciseId; })[0];
+    ex.sets = ex.sets || [];
+    var existing = ex.sets.filter(function (s) { return Number(s.set_number) === Number(setNumber); })[0];
+    var payload = {
+      set_number: setNumber, weight_planned: ex.weight_planned, weight_actual: weightActual,
+      reps_planned: ex.reps_planned, reps_actual: repsActual, status: status || 'COMPLETED',
+      // RIR real (normas de Javier, sección 8): opcional — si no se manda, queda null y el motor
+      // de progresión simplemente no lo usa como criterio para ese set.
+      rir_actual: (rirActual === undefined || rirActual === null || rirActual === '') ? null : Number(rirActual),
+      completed_at: nowIso_(), note: note || ''
+    };
+    if (existing) Object.assign(existing, payload); else ex.sets.push(payload);
+    if (ex.status === 'PENDING') ex.status = 'IN_PROGRESS';
+
+    var isLastSet = Number(setNumber) >= Number(ex.sets_planned);
+    var result;
+    if (isLastSet) {
+      ex.status = 'COMPLETED';
+      session.rest = { resting: false };
+      result = { restStarted: false, exerciseCompleted: true };
+    } else {
+      var restSeconds = Number(ex.rest_planned_seconds) || 0;
+      var restEndTime = new Date(Date.now() + restSeconds * 1000).toISOString();
+      session.rest = { resting: true, restEndTime: restEndTime, nextExerciseId: ex.id, nextSetNumber: Number(setNumber) + 1 };
+      result = { restStarted: true, restSeconds: restSeconds, restEndTime: restEndTime };
+    }
+    return saveSession_(session).then(function () {
+      if (!isLastSet) return result;
+      return maybeAutoCompleteSession_(session.id).then(function (finishResult) {
+        result.sessionAutoCompleted = !!finishResult;
+        result.finishResult = finishResult || null;
+        return result;
+      });
+    });
+  });
+};
+
+FS.skipExercise = function (sessionExerciseId) {
+  return findSessionBySessionExerciseId_(sessionExerciseId).then(function (session) {
+    var ex = session.exercises.filter(function (e) { return e.id === sessionExerciseId; })[0];
+    ex.status = 'SKIPPED';
+    session.rest = { resting: false };
+    return saveSession_(session).then(function () {
+      return maybeAutoCompleteSession_(session.id).then(function (finishResult) {
+        return { sessionAutoCompleted: !!finishResult, finishResult: finishResult || null };
+      });
+    });
+  });
+};
+
+FS.skipRestNow = function (sessionId) {
+  return getSessionDoc_(sessionId).then(function (session) {
+    session.rest = { resting: false };
+    return saveSession_(session).then(function () { return true; });
+  });
+};
+
+FS.pauseSession = function (sessionId) {
+  return getSessionDoc_(sessionId).then(function (session) {
+    if (session.status !== 'IN_PROGRESS') throw new Error('La sesión no está en curso.');
+    var elapsed = computeActiveElapsedSeconds_(session);
+    session.status = 'PAUSED'; session.active_seconds_accumulated = elapsed; session.last_resume_time = '';
+    return saveSession_(session).then(function () { return { activeElapsedSeconds: elapsed }; });
+  });
+};
+
+FS.resumeSession = function (sessionId) {
+  return getSessionDoc_(sessionId).then(function (session) {
+    if (session.status !== 'PAUSED') throw new Error('La sesión no está en pausa.');
+    session.status = 'IN_PROGRESS'; session.last_resume_time = nowIso_();
+    return saveSession_(session).then(function () { return true; });
+  });
+};
+
+FS.startWod = function (sessionId) {
+  return getSessionDoc_(sessionId).then(function (session) {
+    if (!session.wod) throw new Error('Esta sesión no tiene WOD.');
+    session.wod.status = 'IN_PROGRESS'; session.wod.started_at = nowIso_();
+    return saveSession_(session).then(function () { return { wodId: sessionId, startedAt: session.wod.started_at }; });
+  });
+};
+
+FS.finishWod = function (sessionId, status, resultObj, note) {
+  return getSessionDoc_(sessionId).then(function (session) {
+    if (!session.wod) throw new Error('Esta sesión no tiene WOD.');
+    session.wod.status = status; session.wod.result = resultObj || {}; session.wod.finished_at = nowIso_(); session.wod.note = note || '';
+    return saveSession_(session).then(function () {
+      return maybeAutoCompleteSession_(sessionId).then(function (finishResult) {
+        return { sessionAutoCompleted: !!finishResult, finishResult: finishResult || null };
+      });
+    });
+  });
+};
+
+FS.skipWod = function (sessionId) { return FS.finishWod(sessionId, 'SKIPPED', {}, ''); };
+
+/* ---------------- Captura automática de RM en semana de test (decidido con Javier, 2026-08-26) ----------------
+ * Cuando la semana que se está cerrando es la semana de test de RM (`phase.week_plan[].is_rm_test`),
+ * cada ejercicio PRINCIPAL de esa sesión escribe un nuevo registro en `rms` con el peso más alto que
+ * realmente se completó ese día (`maxCompletedWeightActual_`) — sea mayor, igual o menor al RM
+ * anterior, tal como pidió Javier ("se guarda el máximo peso movido en ese momento"). No hace falta
+ * que Javier toque nada — el botón manual "Actualizar RM" sigue disponible para correcciones. Se
+ * dispara tanto si la sesión terminó COMPLETED como INCOMPLETE (si hizo al menos una serie válida),
+ * pero no si se abandona (`abandonSession` no pasa por acá). */
+function captureTestWeekRms_(session, phase) {
+  if (!phase || !Array.isArray(phase.week_plan)) return Promise.resolve([]);
+  var weekPlanEntry = phase.week_plan.filter(function (w) { return Number(w.week_number) === Number(session.week_number); })[0];
+  if (!weekPlanEntry || !weekPlanEntry.is_rm_test) return Promise.resolve([]);
+  var writes = (session.exercises || [])
+    .filter(function (ex) { return ex.category === 'PRINCIPAL' && ex.percent_of_movement; })
+    .map(function (ex) {
+      var maxWeight = maxCompletedWeightActual_(ex);
+      if (maxWeight === null) return null;
+      return col_('rms').add({
+        phase_id: phase.id, movement_key: ex.percent_of_movement, value_kg: maxWeight,
+        effective_date: session.date || todayDateString_(),
+        note: 'Test de RM automático — fase ' + phase.name + ', semana ' + session.week_number,
+        created_at: nowIso_(), source: 'AUTO_TEST_WEEK', session_id: session.id
+      });
+    })
+    .filter(Boolean);
+  return Promise.all(writes);
+}
+
+FS.finishSession = function (sessionId, note) {
+  return getSessionDoc_(sessionId).then(function (session) {
+    if (session.status === 'COMPLETED' || session.status === 'INCOMPLETE' || session.status === 'ABANDONED') {
+      return { alreadyFinished: true, status: session.status };
+    }
+    var elapsed = session.status === 'IN_PROGRESS' ? computeActiveElapsedSeconds_(session) : (Number(session.active_seconds_accumulated) || 0);
+    var summary = sessionCompletionSummary_(session);
+    var finalStatus = summary.isFullyComplete ? 'COMPLETED' : 'INCOMPLETE';
+    var totalElapsedSinceStart = Math.round((new Date() - new Date(session.start_time)) / 1000);
+    var pausedSeconds = Math.max(0, totalElapsedSinceStart - elapsed);
+
+    session.status = finalStatus; session.end_time = nowIso_(); session.active_seconds_accumulated = elapsed;
+    session.paused_seconds = pausedSeconds; session.session_note = note || session.session_note; session.rest = null;
+
+    return saveSession_(session).then(function () {
+      return col_('phases').doc(session.phase_id).get().then(function (phaseSnap) {
+        var phase = phaseSnap.exists ? Object.assign({ id: session.phase_id }, phaseSnap.data()) : null;
+        var isLastOfPhase = !!phase && Number(session.day_number) === 6 && Number(session.week_number) === Number(phase.weeks);
+        return Promise.all([advanceRotation_(session.phase_id), captureTestWeekRms_(session, phase)]).then(function (r) {
+          var result = { status: finalStatus, activeElapsedSeconds: elapsed };
+          result.rmsAutoUpdated = (r[1] || []).length;
+          if (!isLastOfPhase) return result;
+          return getPhaseRotation_().then(function (rotation) {
+            result.phaseCompleted = true;
+            result.finishedPhaseName = phase.name;
+            result.nextPhaseSuggestion = suggestNextPhase_(phase.name, rotation);
+            return result;
+          });
+        });
+      });
+    });
+  });
+};
+
+FS.saveSessionNote = function (sessionId, note) {
+  return getSessionDoc_(sessionId).then(function (session) {
+    session.session_note = note || '';
+    return saveSession_(session).then(function () { return true; });
+  });
+};
+
+FS.abandonSession = function (sessionId) {
+  return getSessionDoc_(sessionId).then(function (session) {
+    var elapsed = session.status === 'IN_PROGRESS' ? computeActiveElapsedSeconds_(session) : (Number(session.active_seconds_accumulated) || 0);
+    session.status = 'ABANDONED'; session.end_time = nowIso_(); session.active_seconds_accumulated = elapsed; session.rest = null;
+    return saveSession_(session).then(function () { return true; });
+  });
+};
+
+/* ---------------- Historial ---------------- */
+
+function formatDuration_(totalSeconds) {
+  totalSeconds = Math.max(0, Math.round(Number(totalSeconds) || 0));
+  var h = Math.floor(totalSeconds / 3600), m = Math.floor((totalSeconds % 3600) / 60);
+  return h > 0 ? (h + 'h ' + m + 'min') : (m + ' min');
+}
+
+FS.getHistory = function () {
+  return col_('sessions').orderBy('date', 'desc').get().then(function (snap) {
+    var rows = [];
+    snap.forEach(function (d) {
+      var s = d.data();
+      if (s.status !== 'COMPLETED' && s.status !== 'INCOMPLETE' && s.status !== 'ABANDONED') return;
+      var exercisesDone = (s.exercises || []).filter(function (e) { return e.status === 'COMPLETED' || e.status === 'SKIPPED'; }).length;
+      rows.push({
+        sessionId: d.id, date: s.date, dayNumber: s.day_number, dayName: s.day_name, status: s.status,
+        durationLabel: formatDuration_(s.active_seconds_accumulated), exercisesDone: exercisesDone, exercisesTotal: (s.exercises || []).length
+      });
+    });
+    return rows;
+  });
+};
+
+FS.getHistoryDetail = function (sessionId) {
+  return getSessionDoc_(sessionId).then(function (session) {
+    return {
+      session: session, durationLabel: formatDuration_(session.active_seconds_accumulated),
+      exercises: (session.exercises || []).slice().sort(function (a, b) { return Number(a.order) - Number(b.order); }),
+      wod: session.wod || null
+    };
+  });
+};
+
+/* ---------------- Fases ---------------- */
+
+FS.getPhasesList = function () {
+  return col_('phases').get().then(function (snap) {
+    var phases = [];
+    snap.forEach(function (d) { phases.push(Object.assign({ id: d.id }, d.data())); });
+    phases.sort(function (a, b) { return String(b.created_at || '').localeCompare(String(a.created_at || '')); });
+    return Promise.all(phases.map(function (p) {
+      return col_('sessions').where('phase_id', '==', p.id).get().then(function (snap2) {
+        var count = 0;
+        snap2.forEach(function (d) { var st = d.data().status; if (st === 'COMPLETED' || st === 'INCOMPLETE') count++; });
+        return {
+          id: p.id, name: p.name, description: p.description, status: p.status, weeks: Number(p.weeks),
+          currentWeekNumber: Number(p.current_week_number), currentDayNumber: Number(p.current_day_number),
+          startDate: p.start_date, endDate: p.end_date, sessionsRecorded: count
+        };
+      });
+    }));
+  });
+};
+
+FS.activatePhase = function (phaseId) {
+  return col_('phases').where('status', '==', 'ACTIVE').get().then(function (snap) {
+    var ps = [];
+    snap.forEach(function (d) { if (d.id !== phaseId) ps.push(col_('phases').doc(d.id).update({ status: 'ARCHIVED', updated_at: nowIso_() })); });
+    return Promise.all(ps);
+  }).then(function () {
+    return col_('phases').doc(phaseId).update({ status: 'ACTIVE', updated_at: nowIso_() }).then(function () { return true; });
+  });
+};
+
+FS.adjustRotationPosition = function (weekNumber, dayNumber) {
+  return getActivePhase_().then(function (phase) { return setRotationPosition_(phase.id, weekNumber, dayNumber).then(function () { return true; }); });
+};
+
+// weekdays: array de números ISO (1=lunes...7=domingo), o null/[] para "todos los días" (default).
+// Permite ajustar esto sin reimportar el CSV completo — igual que adjustRotationPosition.
+FS.setWodWeekdays = function (weekdays) {
+  var clean = (weekdays || []).map(function (n) { return Number(n); }).filter(function (n) { return n >= 1 && n <= 7; });
+  return getActivePhase_().then(function (phase) {
+    return col_('phases').doc(phase.id).update({ wod_weekdays: clean, updated_at: nowIso_() }).then(function () { return true; });
+  });
+};
+
+/* ---------------- Importación CSV (parseo 100% en el navegador) ---------------- */
+
+// Columnas OBLIGATORIAS — todo CSV de importación tiene que traerlas (aunque vengan vacías en
+// filas donde no apliquen). Son las que ya existían antes de la periodización por RIR.
+var IMPORT_CSV_HEADERS = [
+  'row_type', 'week_number', 'day_number', 'day_name', 'warmup_group_id', 'section', 'order', 'name',
+  'reps_or_duration', 'exercise_name', 'sets', 'reps', 'weight_type', 'weight_value', 'percent_of_movement',
+  'rest_seconds', 'unit', 'notes', 'wod_type', 'structure_json', 'movement_key', 'value_kg'
+];
+
+// Columnas OPCIONALES de periodización por RIR (normas de Javier) — si el CSV no las trae, cada
+// fila simplemente no las usa (se comportan como antes de esta funcionalidad, sin romper nada).
+var OPTIONAL_CSV_HEADERS = [
+  // PROGRAM_EXERCISE:
+  'category', 'min_reps', 'max_reps', 'target_rir_min', 'target_rir_max', 'progression_method',
+  // PHASE_WEEK (una fila por semana):
+  'deload', 'volume_multiplier', 'wod_frequency', 'is_rm_test',
+  // PHASE_META (una única fila por fase):
+  'phase_order', 'priority_fuerza', 'priority_hipertrofia', 'priority_wod', 'wod_weekdays',
+  // PROGRAM_WOD:
+  'wod_intensity', 'wod_priority'
+];
+
+function parseCsvText_(csvText) {
+  var rows = [], row = [], field = '', inQuotes = false;
+  for (var i = 0; i < csvText.length; i++) {
+    var c = csvText[i], next = csvText[i + 1];
+    if (inQuotes) {
+      if (c === '"' && next === '"') { field += '"'; i++; }
+      else if (c === '"') { inQuotes = false; }
+      else { field += c; }
+    } else {
+      if (c === '"') inQuotes = true;
+      else if (c === ',') { row.push(field); field = ''; }
+      else if (c === '\r') { /* ignorar */ }
+      else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+      else field += c;
+    }
+  }
+  if (field.length > 0 || row.length > 0) { row.push(field); rows.push(row); }
+  return rows.filter(function (r) { return !(r.length === 1 && r[0] === ''); });
+}
+
+function parseImportCsv_(csvText) {
+  if (!csvText || !csvText.trim()) throw new Error('El archivo CSV está vacío.');
+  var table = parseCsvText_(csvText);
+  if (table.length < 2) throw new Error('El CSV no tiene filas de datos, solo cabecera (o está vacío).');
+  var headers = table[0].map(function (h) { return String(h).trim(); });
+  var missing = IMPORT_CSV_HEADERS.filter(function (h) { return headers.indexOf(h) === -1; });
+  if (missing.length > 0) throw new Error('Faltan columnas en el CSV: ' + missing.join(', '));
+  var rows = [];
+  for (var r = 1; r < table.length; r++) {
+    var raw = table[r];
+    if (raw.every(function (v) { return String(v).trim() === ''; })) continue;
+    var obj = {};
+    headers.forEach(function (h, i) { obj[h] = raw[i] !== undefined ? String(raw[i]).trim() : ''; });
+    if (!obj.row_type) continue;
+    rows.push(obj);
+  }
+  if (rows.length === 0) throw new Error('El CSV no contiene ninguna fila válida con row_type.');
+  return rows;
+}
+
+function summarizeImportRows_(rows) {
+  var days = {}, exercises = 0, wods = {}, wodExercises = 0, warmups = 0, rms = 0, phaseWeeks = 0, hasPhaseMeta = false;
+  rows.forEach(function (row) {
+    var key = row.week_number + '-' + row.day_number;
+    if (row.row_type === 'PROGRAM_DAY') days[key] = true;
+    else if (row.row_type === 'PROGRAM_EXERCISE') exercises++;
+    else if (row.row_type === 'PROGRAM_WOD') wods[key] = true;
+    else if (row.row_type === 'PROGRAM_WOD_EXERCISE') wodExercises++;
+    else if (row.row_type === 'WARMUP') warmups++;
+    else if (row.row_type === 'RM') rms++;
+    else if (row.row_type === 'PHASE_WEEK') phaseWeeks++;
+    else if (row.row_type === 'PHASE_META') hasPhaseMeta = true;
+  });
+  return {
+    days: Object.keys(days).length, exercises: exercises, wods: Object.keys(wods).length, wodExercises: wodExercises,
+    warmupItems: warmups, rms: rms, phaseWeeks: phaseWeeks, hasPhaseMeta: hasPhaseMeta
+  };
+}
+
+function validateWodStructure_(wodType, structure) {
+  structure = structure || {};
+  if (wodType === 'AMRAP') { if (!structure.duration_seconds || structure.duration_seconds <= 0) throw new Error('AMRAP necesita duration_seconds > 0.'); }
+  else if (wodType === 'EMOM') { if (!structure.total_minutes || !structure.interval_seconds) throw new Error('EMOM necesita total_minutes e interval_seconds.'); }
+  else if (wodType === 'TABATA') { if (!structure.work_seconds || !structure.rest_seconds || !structure.rounds) throw new Error('TABATA necesita work_seconds, rest_seconds y rounds.'); }
+  return true;
+}
+
+FS.previewImportCsv = function (csvText, phaseName) {
+  var rows = parseImportCsv_(csvText);
+  var summary = summarizeImportRows_(rows);
+  return col_('phases').get().then(function (snap) {
+    var nameExists = false, activePhaseName = null;
+    snap.forEach(function (d) {
+      var p = d.data();
+      if (p.name === phaseName) nameExists = true;
+      if (p.status === 'ACTIVE') activePhaseName = p.name;
+    });
+    return { summary: summary, phaseNameAlreadyExists: nameExists, currentActivePhaseName: activePhaseName, rowCount: rows.length };
+  });
+};
+
+function buildProgramDaysFromRows_(rows) {
+  var byKey = {};
+  function ensure(week, day) {
+    var key = week + '-' + day;
+    if (!byKey[key]) byKey[key] = { week_number: Number(week), day_number: Number(day), day_name: '', warmup_group_id: '', exercises: [], wod: null };
+    return byKey[key];
+  }
+  rows.filter(function (r) { return r.row_type === 'PROGRAM_DAY'; }).forEach(function (r) {
+    var d = ensure(r.week_number, r.day_number);
+    d.day_name = r.day_name || d.day_name;
+    d.warmup_group_id = r.warmup_group_id || d.warmup_group_id;
+  });
+  rows.filter(function (r) { return r.row_type === 'PROGRAM_EXERCISE'; }).forEach(function (r) {
+    var d = ensure(r.week_number, r.day_number);
+    d.exercises.push({
+      id: uuid_(), order: Number(r.order) || (d.exercises.length + 1), exercise_name: r.exercise_name,
+      sets: Number(r.sets) || 0, reps: r.reps, weight_type: r.weight_type || 'NONE', weight_value: r.weight_value,
+      percent_of_movement: r.percent_of_movement || '', rest_seconds: Number(r.rest_seconds) || 0, unit: r.unit || 'kg', notes: r.notes || '',
+      // Periodización por RIR / doble progresión (normas de Javier):
+      category: r.category || 'PRINCIPAL',
+      min_reps: (r.min_reps !== undefined && r.min_reps !== '') ? Number(r.min_reps) : null,
+      max_reps: (r.max_reps !== undefined && r.max_reps !== '') ? Number(r.max_reps) : null,
+      target_rir_min: (r.target_rir_min !== undefined && r.target_rir_min !== '') ? Number(r.target_rir_min) : null,
+      target_rir_max: (r.target_rir_max !== undefined && r.target_rir_max !== '') ? Number(r.target_rir_max) : null,
+      progression_method: r.progression_method || 'NONE'
+    });
+  });
+  var wodByKey = {};
+  rows.filter(function (r) { return r.row_type === 'PROGRAM_WOD'; }).forEach(function (r) {
+    var d = ensure(r.week_number, r.day_number);
+    var structure = {};
+    try { structure = r.structure_json ? JSON.parse(r.structure_json) : {}; } catch (e) { throw new Error('structure_json inválido en semana ' + r.week_number + ' día ' + r.day_number + ': ' + e.message); }
+    validateWodStructure_(r.wod_type, structure);
+    d.wod = {
+      wod_type: r.wod_type, structure: structure, notes: r.notes || '', exercises: [],
+      intensity: r.wod_intensity || '', priority: r.wod_priority || ''
+    };
+    wodByKey[r.week_number + '-' + r.day_number] = d.wod;
+  });
+  rows.filter(function (r) { return r.row_type === 'PROGRAM_WOD_EXERCISE'; }).forEach(function (r) {
+    var wod = wodByKey[r.week_number + '-' + r.day_number];
+    if (!wod) throw new Error('PROGRAM_WOD_EXERCISE "' + r.exercise_name + '" no tiene un PROGRAM_WOD en semana/día ' + r.week_number + '/' + r.day_number + ' en este CSV.');
+    wod.exercises.push({ order: Number(r.order) || (wod.exercises.length + 1), exercise_name: r.exercise_name, reps: r.reps, weight_type: r.weight_type || 'NONE', weight_value: r.weight_value, unit: r.unit || 'kg' });
+  });
+  return byKey;
+}
+
+function buildWarmupWritesFromRows_(rows) {
+  var byGroup = {};
+  rows.filter(function (r) { return r.row_type === 'WARMUP'; }).forEach(function (r) {
+    if (!byGroup[r.warmup_group_id]) byGroup[r.warmup_group_id] = { MOVILIDAD_ARTICULAR: [], ACTIVACION_GENERAL: [], ACTIVACION_ESPECIFICA: [] };
+    var sec = byGroup[r.warmup_group_id][r.section];
+    if (sec) sec.push({ order: Number(r.order) || (sec.length + 1), name: r.name, reps_or_duration: r.reps_or_duration });
+  });
+  return Object.keys(byGroup).map(function (groupId) { return col_('warmups').doc(groupId).set(byGroup[groupId], { merge: true }); });
+}
+
+/* ---------------- Metadata de fase / semana (normas de Javier: PHASE.order/priority, PHASE_WEEK) ---------------- */
+
+function buildPhaseMetaFromRows_(rows) {
+  var row = rows.filter(function (r) { return r.row_type === 'PHASE_META'; })[0];
+  if (!row) return null;
+  // wod_weekdays: lista de días ISO separados por punto y coma dentro de la celda, ej. "1;3;5"
+  // (no se usa coma porque el CSV ya usa coma como separador de columnas). Vacío/ausente = todos
+  // los días (comportamiento de siempre).
+  var wodWeekdays = null;
+  if (row.wod_weekdays !== undefined && String(row.wod_weekdays).trim() !== '') {
+    wodWeekdays = String(row.wod_weekdays).split(';')
+      .map(function (s) { return Number(s.trim()); })
+      .filter(function (n) { return n >= 1 && n <= 7; });
+  }
+  return {
+    order: (row.phase_order !== undefined && row.phase_order !== '') ? Number(row.phase_order) : null,
+    priority: {
+      fuerza: (row.priority_fuerza !== undefined && row.priority_fuerza !== '') ? Number(row.priority_fuerza) : null,
+      hipertrofia: (row.priority_hipertrofia !== undefined && row.priority_hipertrofia !== '') ? Number(row.priority_hipertrofia) : null,
+      wod: (row.priority_wod !== undefined && row.priority_wod !== '') ? Number(row.priority_wod) : null
+    },
+    wodWeekdays: wodWeekdays
+  };
+}
+
+function buildWeekPlanFromRows_(rows) {
+  return rows.filter(function (r) { return r.row_type === 'PHASE_WEEK'; })
+    .map(function (r) {
+      return {
+        week_number: Number(r.week_number),
+        target_rir_min: (r.target_rir_min !== undefined && r.target_rir_min !== '') ? Number(r.target_rir_min) : null,
+        target_rir_max: (r.target_rir_max !== undefined && r.target_rir_max !== '') ? Number(r.target_rir_max) : null,
+        volume_multiplier: (r.volume_multiplier !== undefined && r.volume_multiplier !== '') ? Number(r.volume_multiplier) : null,
+        wod_frequency: (r.wod_frequency !== undefined && r.wod_frequency !== '') ? Number(r.wod_frequency) : null,
+        deload: String(r.deload || '').trim().toUpperCase() === 'TRUE',
+        is_rm_test: String(r.is_rm_test || '').trim().toUpperCase() === 'TRUE'
+      };
+    })
+    .sort(function (a, b) { return a.week_number - b.week_number; });
+}
+
+/* 2026-08-26: los RM que trae un CSV/Sheet ahora son SOLO una semilla — se escriben nada más si
+ * todavía no existe ningún registro para ese movement_key. Si ya hay un RM real (de una fase
+ * anterior o de una captura automática de semana de test), importar una fase nueva NUNCA lo pisa
+ * con el valor viejo que quedó escrito en el documento. `existingRms` viene de getAllCurrentRms_(),
+ * ya resuelto antes de llamar a esto. Devuelve { writes, skipped } — `skipped` es para mostrarle a
+ * Javier en el resumen qué RM del CSV se ignoraron por ya existir. */
+function buildSeedOnlyRmWrites_(rows, existingRms, phaseId, phaseName) {
+  var writes = [], skipped = [];
+  rows.filter(function (r) { return r.row_type === 'RM'; }).forEach(function (r) {
+    if (existingRms[r.movement_key]) {
+      skipped.push({ movement_key: r.movement_key, csv_value_kg: Number(r.value_kg), current_value_kg: Number(existingRms[r.movement_key].value_kg) });
+      return;
+    }
+    writes.push(col_('rms').add({
+      phase_id: phaseId, movement_key: r.movement_key, value_kg: Number(r.value_kg), effective_date: todayDateString_(),
+      note: 'Valor inicial — importado con la fase ' + phaseName, created_at: nowIso_(), source: 'CSV_SEED'
+    }));
+  });
+  return { writes: writes, skipped: skipped };
+}
+
+FS.confirmImportCsv = function (csvText, phaseName, weeksCount, description) {
+  if (!phaseName || !phaseName.trim()) throw new Error('La fase necesita un nombre.');
+  var rows = parseImportCsv_(csvText);
+  return Promise.all([
+    col_('phases').where('status', '==', 'ACTIVE').get(),
+    getAllCurrentRms_()
+  ]).then(function (results) {
+    var snap = results[0], existingRms = results[1];
+    var archivePromises = [];
+    snap.forEach(function (d) { archivePromises.push(col_('phases').doc(d.id).update({ status: 'ARCHIVED', updated_at: nowIso_() })); });
+    return Promise.all(archivePromises).then(function () { return existingRms; });
+  }).then(function (existingRms) {
+    var phaseId = uuid_();
+    var meta = buildPhaseMetaFromRows_(rows);
+    var weekPlan = buildWeekPlanFromRows_(rows);
+    return col_('phases').doc(phaseId).set({
+      name: phaseName.trim(), description: description || '', start_date: todayDateString_(), end_date: '',
+      weeks: weeksCount || 6, status: 'ACTIVE', current_week_number: 1, current_day_number: 1,
+      completed_sessions_count: 0,
+      order: meta ? meta.order : null, priority: meta ? meta.priority : null, week_plan: weekPlan,
+      wod_weekdays: meta ? meta.wodWeekdays : null,
+      created_at: nowIso_(), updated_at: nowIso_()
+    }).then(function () {
+      var byKey = buildProgramDaysFromRows_(rows);
+      var dayWrites = Object.keys(byKey).map(function (key) {
+        var d = byKey[key];
+        return col_('programDays').doc(uuid_()).set({
+          phase_id: phaseId, week_number: d.week_number, day_number: d.day_number,
+          day_name: d.day_name, warmup_group_id: d.warmup_group_id, exercises: d.exercises, wod: d.wod
+        });
+      });
+      var warmupWrites = buildWarmupWritesFromRows_(rows);
+      var rmResult = buildSeedOnlyRmWrites_(rows, existingRms, phaseId, phaseName);
+      return Promise.all(dayWrites.concat(warmupWrites).concat(rmResult.writes)).then(function () {
+        var summary = summarizeImportRows_(rows);
+        summary.rmsSkipped = rmResult.skipped;
+        return { phaseId: phaseId, summary: summary };
+      });
+    });
+  });
+};
+
+FS.previewImportIntoActivePhase = function (csvText) {
+  var rows = parseImportCsv_(csvText);
+  return getActivePhase_().then(function (phase) { return { summary: summarizeImportRows_(rows), activePhaseName: phase.name, rowCount: rows.length }; });
+};
+
+FS.confirmImportIntoActivePhase = function (csvText) {
+  var rows = parseImportCsv_(csvText);
+  return getActivePhase_().then(function (phase) {
+    return Promise.all([
+      col_('programDays').where('phase_id', '==', phase.id).get(),
+      getAllCurrentRms_()
+    ]).then(function (results) {
+      var snap = results[0], existingRms = results[1];
+      var merged = {}, existingDocIdByKey = {};
+      snap.forEach(function (d) {
+        var data = d.data();
+        var key = data.week_number + '-' + data.day_number;
+        merged[key] = Object.assign({}, data);
+        existingDocIdByKey[key] = d.id;
+      });
+      var incoming = buildProgramDaysFromRows_(rows);
+      Object.keys(incoming).forEach(function (key) {
+        if (!merged[key]) { merged[key] = incoming[key]; return; }
+        merged[key].day_name = incoming[key].day_name || merged[key].day_name;
+        merged[key].warmup_group_id = incoming[key].warmup_group_id || merged[key].warmup_group_id;
+        merged[key].exercises = (merged[key].exercises || []).concat(incoming[key].exercises || []);
+        if (incoming[key].wod) merged[key].wod = incoming[key].wod;
+      });
+      var dayWrites = Object.keys(merged).map(function (key) {
+        var d = merged[key];
+        var docId = existingDocIdByKey[key] || uuid_();
+        return col_('programDays').doc(docId).set({
+          phase_id: phase.id, week_number: d.week_number, day_number: d.day_number,
+          day_name: d.day_name, warmup_group_id: d.warmup_group_id, exercises: d.exercises, wod: d.wod
+        });
+      });
+      var warmupWrites = buildWarmupWritesFromRows_(rows);
+      var rmResult = buildSeedOnlyRmWrites_(rows, existingRms, phase.id, phase.name);
+      // Si el CSV trae filas PHASE_META / PHASE_WEEK, se fusionan sobre lo que ya tenía la fase
+      // (por semana — no se pisa la fase entera) en vez de reemplazar todo.
+      var meta = buildPhaseMetaFromRows_(rows);
+      var incomingWeekPlan = buildWeekPlanFromRows_(rows);
+      var phasePatch = { updated_at: nowIso_() };
+      if (meta) {
+        phasePatch.order = meta.order; phasePatch.priority = meta.priority;
+        if (meta.wodWeekdays !== null) phasePatch.wod_weekdays = meta.wodWeekdays;
+      }
+      if (incomingWeekPlan.length) {
+        var mergedWeekPlan = (phase.week_plan || []).slice();
+        incomingWeekPlan.forEach(function (w) {
+          var idx = mergedWeekPlan.findIndex ? mergedWeekPlan.findIndex(function (mw) { return mw.week_number === w.week_number; }) : -1;
+          if (idx === -1) { mergedWeekPlan.push(w); } else { mergedWeekPlan[idx] = w; }
+        });
+        mergedWeekPlan.sort(function (a, b) { return a.week_number - b.week_number; });
+        phasePatch.week_plan = mergedWeekPlan;
+      }
+      var phaseUpdate = (meta || incomingWeekPlan.length) ? col_('phases').doc(phase.id).update(phasePatch) : Promise.resolve();
+      return Promise.all(dayWrites.concat(warmupWrites).concat(rmResult.writes).concat([phaseUpdate])).then(function () {
+        var summary = summarizeImportRows_(rows);
+        summary.rmsSkipped = rmResult.skipped;
+        return { phaseId: phase.id, summary: summary };
+      });
+    });
+  });
+};
+
+/* ---------------- Puente con gs() — no se cambia ningún sitio donde se llama gs('algo', ...) ---------------- */
+
+function gs(fn) {
+  var args = Array.prototype.slice.call(arguments, 1);
+  var impl = FS[fn];
+  if (typeof impl !== 'function') return Promise.reject(new Error('Función no implementada: ' + fn));
+  return Promise.resolve().then(function () { return impl.apply(null, args); });
+}
+
+/* ---------------- UI helpers ---------------- */
+
+function showLoading() { document.getElementById('loadingOverlay').classList.remove('hidden'); }
+function hideLoading() { document.getElementById('loadingOverlay').classList.add('hidden'); }
+var toastTimer = null;
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.remove('hidden');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function () { t.classList.add('hidden'); }, 3200);
+}
+function showError(err) { showToast('⚠ ' + (err && err.message ? err.message : err)); }
+function el(id) { return document.getElementById(id); }
+function esc(s) { return (s === undefined || s === null) ? '' : String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+function formatMMSS(totalSeconds) {
+  totalSeconds = Math.max(0, Math.round(totalSeconds));
+  var m = Math.floor(totalSeconds / 60), s = totalSeconds % 60;
+  return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+}
+function weightLabel(value, type, unit) {
+  if (type === 'BODYWEIGHT') return 'Peso corporal';
+  if (type === 'NONE' || value === null || value === undefined || value === '') return 'Sin peso';
+  return value + ' ' + (unit || 'kg');
+}
+
+/* ---------------- Sonido (Web Audio, sin archivos) y vibración ---------------- */
+
+function unlockAudio_() {
+  if (APP.audioCtx) return;
+  try { APP.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { APP.audioCtx = null; }
+}
+document.addEventListener('touchstart', unlockAudio_, { once: true });
+document.addEventListener('click', unlockAudio_, { once: true });
+
+function beep(freq, durationMs, volume) {
+  if (!APP.config.soundOn || !APP.audioCtx) return;
+  try {
+    var ctx = APP.audioCtx;
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq || 880;
+    gain.gain.value = (volume || 0.2);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (durationMs || 150) / 1000);
+    osc.stop(ctx.currentTime + (durationMs || 150) / 1000 + 0.02);
+  } catch (e) { /* silencioso: el sonido nunca debe romper la app */ }
+}
+function beepCountdownTick() { beep(660, 110, 0.18); }
+function beepFinal() { beep(880, 320, 0.28); setTimeout(function () { beep(1046, 260, 0.28); }, 160); }
+function vibrate(pattern) { if (APP.config.vibrationOn && navigator.vibrate) { try { navigator.vibrate(pattern); } catch (e) {} } }
+
+/* ---------------- Mantener la pantalla encendida durante el entrenamiento (Wake Lock) ----------------
+ * El navegador libera el wake lock automáticamente si la pestaña pierde el foco (se apaga la
+ * pantalla, se cambia de app, etc.), así que hay que volver a pedirlo cuando la pestaña vuelve
+ * a estar visible mientras haya una sesión en curso. Si el navegador no soporta la API (Safari
+ * antiguo, etc.) simplemente no hace nada: nunca debe romper la app. */
+var wakeLock_ = null;
+function requestWakeLock_() {
+  if (!('wakeLock' in navigator)) return;
+  navigator.wakeLock.request('screen').then(function (lock) {
+    wakeLock_ = lock;
+    wakeLock_.addEventListener('release', function () { wakeLock_ = null; });
+  }).catch(function () { /* puede rechazarse (batería baja, etc.); no debe romper la app */ });
+}
+function releaseWakeLock_() {
+  if (wakeLock_) { wakeLock_.release().catch(function () {}); wakeLock_ = null; }
+}
+document.addEventListener('visibilitychange', function () {
+  if (document.visibilityState === 'visible' && APP.currentSessionId && APP.sessionState && APP.sessionState.session && APP.sessionState.session.status === 'IN_PROGRESS') {
+    requestWakeLock_();
+  }
+});
+
+/* ---------------- Router ---------------- */
+
+var SCREENS = ['hoy', 'detalle', 'editor', 'calentamiento', 'ejercicio', 'descanso', 'pausa', 'wod', 'resultado', 'recuperacion', 'historial', 'historial-detalle', 'fases', 'importar', 'ajustes'];
+var IMMERSIVE_SCREENS = ['calentamiento', 'ejercicio', 'descanso', 'pausa', 'wod', 'resultado', 'recuperacion'];
+
+function goScreen(name) {
+  SCREENS.forEach(function (s) { el('screen-' + s).classList.remove('active'); });
+  el('screen-' + name).classList.add('active');
+  el('fabPause').classList.toggle('hidden', name !== 'ejercicio');
+  window.scrollTo(0, 0);
+  if (name === 'historial') renderHistorial();
+  if (name === 'fases') renderFases();
+  if (name === 'ajustes') renderAjustes();
+  updateBottomNavs_(name);
+}
+
+function updateBottomNavs_(active) {
+  var navHtml = function (highlight) {
+    return '' +
+      '<button class="nav-item ' + (highlight === 'hoy' ? 'active' : '') + '" onclick="goHoy()"><span class="nav-icon">🏠</span>Hoy</button>' +
+      '<button class="nav-item ' + (highlight === 'historial' ? 'active' : '') + '" onclick="goScreen(\'historial\')"><span class="nav-icon">📜</span>Historial</button>' +
+      '<button class="nav-item ' + (highlight === 'fases' ? 'active' : '') + '" onclick="goScreen(\'fases\')"><span class="nav-icon">📁</span>Fases</button>' +
+      '<button class="nav-item ' + (highlight === 'ajustes' ? 'active' : '') + '" onclick="goScreen(\'ajustes\')"><span class="nav-icon">⚙️</span>Ajustes</button>';
+  };
+  ['bottomNavHoy', 'bottomNavHistorial', 'bottomNavFases', 'bottomNavAjustes'].forEach(function (id) {
+    if (el(id)) el(id).innerHTML = navHtml(active);
+  });
+}
+
+function goHoy() { loadToday(); }
+
+/* ---------------- Arranque ---------------- */
+
+/* boot() ya no se dispara en window.load: lo llama fsauth.onAuthStateChanged() de arriba,
+ * una vez confirmada la sesión de Google con el email permitido. */
+
+function boot() {
+  showLoading();
+  gs('getConfig').then(function (cfg) { APP.config = cfg; }).catch(function () {}).then(function () {
+    return loadToday();
+  }).catch(function (e) { showError(e); }).then(hideLoading);
+}
+
+function loadToday() {
+  return gs('getTodayView').then(function (view) {
+    APP.today = view;
+    if (view.recoverableSession) {
+      renderRecuperacion(view.recoverableSession);
+      goScreen('recuperacion');
+    } else {
+      renderHoy(view);
+      goScreen('hoy');
+    }
+  }).catch(function (e) { showError(e); });
+}
+
+/* ============================================================================================
+ * 1. HOY
+ * ==========================================================================================*/
+
+/* FASE / SEMANA / DÍA / OBJETIVO (normas de Javier, sección 12) — se calcula a partir de
+ * phase.priority y del week_plan de la semana actual (deload / test de RM / prioridad normal). */
+function weekObjectiveLabel_(view) {
+  var wp = view.weekPlan;
+  if (wp && wp.is_rm_test) return 'Test de RM';
+  if (wp && wp.deload) return 'Descarga';
+  var p = view.phase && view.phase.priority;
+  if (p && (p.fuerza != null || p.hipertrofia != null || p.wod != null)) {
+    var parts = [];
+    if (Number(p.fuerza) >= 40) parts.push('Fuerza');
+    if (Number(p.hipertrofia) >= 30) parts.push('Hipertrofia');
+    if (Number(p.wod) >= 20) parts.push('Conditioning');
+    if (parts.length) return parts.join(' + ');
+  }
+  return view.phase.name;
+}
+
+function renderHoy(view) {
+  var exercisesHtml = (view.exercises || []).map(function (e) {
+    var repsLabel = (e.min_reps != null && e.max_reps != null) ? (e.min_reps + '–' + e.max_reps) : esc(e.reps);
+    var rirLabel = (e.target_rir_min != null) ? (' · RIR ' + e.target_rir_min + (e.target_rir_max != null && e.target_rir_max !== e.target_rir_min ? '–' + e.target_rir_max : '')) : '';
+    return '<div class="ex-item"><span>' + esc(e.exercise_name) + '</span><span class="ex-right">' + e.sets + '×' + repsLabel + rirLabel + ' · ' + esc(weightLabel(e.computed_weight, e.weight_type, e.unit)) + '</span></div>';
+  }).join('');
+  var wodHtml = view.wod ? '<div class="ex-item"><span>WOD · ' + esc(view.wod.wod_type) + '</span><span class="ex-right">' + view.wod.exercises.length + ' movs.</span></div>' : '';
+  if (view.wodScheduledButNotToday) wodHtml += '<div class="hint" style="margin-top:2px;">Hoy no toca WOD (no es día de WOD)</div>';
+  var objectiveLabel = weekObjectiveLabel_(view);
+
+  var body;
+  if (!view.programDay) {
+    body =
+      '<div class="pill-row"><span class="pill">Fase: ' + esc(view.phase.name) + '</span><span class="pill">Semana ' + view.weekNumber + ' de ' + view.phase.weeks + '</span><span class="pill">' + esc(objectiveLabel) + '</span></div>' +
+      '<div class="h1">Día ' + view.dayNumber + '</div>' +
+      '<div class="empty-state">Todavía no hay programación cargada para la semana ' + view.weekNumber + ', día ' + view.dayNumber + '.<br>Impórtala desde <b>Fases → Importar CSV</b> o añádela en la hoja PROGRAM_DAYS / PROGRAM_EXERCISES.</div>';
+    el('hoyCta').innerHTML = '<button class="btn btn-secondary" onclick="goScreen(\'fases\')">Ir a Fases</button>';
+  } else {
+    body =
+      '<div class="pill-row"><span class="pill">Fase: ' + esc(view.phase.name) + '</span><span class="pill">Semana ' + view.weekNumber + ' de ' + view.phase.weeks + '</span><span class="pill">' + esc(objectiveLabel) + '</span></div>' +
+      '<div class="h1">Día ' + view.dayNumber + ' · ' + esc(view.programDay.day_name) + '</div>' +
+      '<p class="sub">' + (view.exercises.length) + ' ejercicios' + (view.wod ? ' + WOD' : '') + '</p>' +
+      '<div class="card" onclick="goScreen(\'detalle\'); renderDetalle(APP.today);" style="cursor:pointer;">' +
+      '<div class="row-between" style="margin-bottom:10px;"><span class="h2" style="font-size:15px;">Resumen</span><span class="badge badge-info">No iniciado</span></div>' +
+      exercisesHtml + wodHtml +
+      '</div>' +
+      '<div class="hint">Toca la tarjeta para ver el detalle completo</div>';
+    el('hoyCta').innerHTML =
+      '<button class="btn btn-secondary" onclick="openEditor()">✏️ Editar entrenamiento</button>' +
+      '<button class="btn btn-primary" onclick="onStartFromHoyClick()">▶ Iniciar entrenamiento</button>';
+  }
+  el('hoyContent').innerHTML = body;
+}
+
+function onStartFromHoyClick() {
+  APP.editorDraft = draftFromToday_(APP.today);
+  startSessionFromDraft();
+}
+
+/* ============================================================================================
+ * 2. DETALLE
+ * ==========================================================================================*/
+
+function renderDetalle(view) {
+  if (!view.programDay) { el('detalleContent').innerHTML = '<div class="empty-state">Sin programación para hoy.</div>'; return; }
+  var html = '<div class="h2">' + esc(view.programDay.day_name) + '</div><p class="sub">Semana ' + view.weekNumber + ' · Día ' + view.dayNumber + '</p>';
+  view.exercises.forEach(function (e, i) {
+    // 2026-08-26: el prefijo "X% RM →" solo tiene sentido cuando el peso de referencia realmente
+    // salió de ese %RM (fuente 'RM' — el PRINCIPAL). Para un accesorio con fuente 'LAST_LOGGED' el
+    // número ya no es un % de nada — es lo último que se cargó — así que se etiqueta distinto para
+    // no confundir "25% RM → 20kg" (que sugeriría que 20kg ES el 25% del RM, cuando no lo es).
+    var weightHtml;
+    if (e.weight_type === 'PERCENT_RM' && e.computed_weight_source === 'RM') {
+      weightHtml = e.weight_value + '% RM → ' + esc(weightLabel(e.computed_weight, e.weight_type, e.unit));
+    } else if (e.computed_weight_source === 'LAST_LOGGED') {
+      weightHtml = 'Última vez: ' + esc(weightLabel(e.computed_weight, e.weight_type, e.unit));
+    } else {
+      weightHtml = esc(weightLabel(e.computed_weight, e.weight_type, e.unit));
+    }
+    var suggestionHtml = '';
+    if (e.progression_suggestion && e.progression_suggestion.action !== 'none') {
+      var suggestionLabel = { increase: '▲ Subí el peso', hold: '► Mantené el peso', reduce: '▼ Bajá el peso' }[e.progression_suggestion.action] || '';
+      suggestionHtml = '<div class="ex-suggestion ex-suggestion-' + esc(e.progression_suggestion.action) + '" title="' + esc(e.progression_suggestion.reason) + '">' + esc(suggestionLabel) + '</div>';
+    }
+    html += '<div class="card"><div class="ex-name">' + (i + 1) + ' · ' + esc(e.exercise_name) + '</div>' +
+      '<div class="ex-meta">' + e.sets + ' series × ' + esc(e.reps) + ' reps · ' + weightHtml +
+      ' · descanso ' + formatMMSS(e.rest_seconds) + (e.notes ? ' · ' + esc(e.notes) : '') + '</div>' + suggestionHtml + '</div>';
+  });
+  if (view.wod) {
+    html += '<div class="card" style="border-color:var(--primary);"><div class="ex-name">WOD · ' + esc(view.wod.wod_type) + '</div>';
+    view.wod.exercises.forEach(function (m) {
+      html += '<div class="wod-move"><span>' + esc(m.reps) + ' ' + esc(m.exercise_name) + '</span><span>' + esc(weightLabel(m.weight_value, m.weight_type, m.unit)) + '</span></div>';
+    });
+    html += '</div>';
+  }
+  el('detalleContent').innerHTML = html;
+  el('detalleCta').innerHTML =
+    '<button class="btn btn-secondary" onclick="openEditor()">✏️ Editar</button>' +
+    '<button class="btn btn-primary" onclick="onStartFromHoyClick()">▶ Iniciar entrenamiento</button>';
+}
+
+/* ============================================================================================
+ * 3. EDITOR — modifica un "borrador" en memoria; nada se guarda en PROGRAM_* nunca.
+ * ==========================================================================================*/
+
+function draftFromToday_(view) {
+  return {
+    exercises: (view.exercises || []).map(function (e) {
+      return { programExerciseId: e.id, exerciseName: e.exercise_name, sets: e.sets, reps: e.reps, weight: e.computed_weight, weightType: e.weight_type, restSeconds: e.rest_seconds, unit: e.unit, notes: e.notes, percentOfMovement: e.percent_of_movement };
+    }),
+    wodIncluded: !!view.wod,
+    wod: view.wod ? { wodType: view.wod.wod_type, structure: view.wod.structure, exercises: view.wod.exercises.slice() } : null
+  };
+}
+
+function openEditor() {
+  if (!APP.editorDraft) APP.editorDraft = draftFromToday_(APP.today);
+  renderEditor();
+  goScreen('editor');
+}
+
+function renderEditor() {
+  var d = APP.editorDraft;
+  var html = '<div class="banner-warning">Los cambios afectan solo a la sesión de hoy. La programación original no se modifica.</div>';
+  d.exercises.forEach(function (ex, i) {
+    html += '<div class="card">' +
+      '<div class="row-between" style="margin-bottom:8px;"><span class="ex-name">' + (i + 1) + ' · ' + esc(ex.exerciseName) + '</span>' +
+      '<span><button class="btn-ghost btn-sm" style="width:auto;padding:4px 8px;" onclick="moveDraftExercise(' + i + ',-1)">↑</button>' +
+      '<button class="btn-ghost btn-sm" style="width:auto;padding:4px 8px;" onclick="moveDraftExercise(' + i + ',1)">↓</button></span></div>' +
+      '<div class="field mb0"><label>Ejercicio</label><input value="' + esc(ex.exerciseName) + '" onchange="updateDraftField(' + i + ',\'exerciseName\',this.value)"></div>' +
+      '<div class="divider"></div>' +
+      '<div class="btn-row" style="margin-bottom:10px;">' +
+      '<div class="field mb0" style="flex:1;"><label>Series</label><input type="number" value="' + ex.sets + '" onchange="updateDraftField(' + i + ',\'sets\',Number(this.value))"></div>' +
+      '<div class="field mb0" style="flex:1;"><label>Reps</label><input value="' + esc(ex.reps) + '" onchange="updateDraftField(' + i + ',\'reps\',this.value)"></div>' +
+      '</div>' +
+      '<div class="btn-row" style="margin-bottom:10px;">' +
+      '<div class="field mb0" style="flex:1;"><label>Peso (' + esc(ex.unit || 'kg') + ')</label><input type="number" step="0.5" value="' + (ex.weight || 0) + '" onchange="updateDraftField(' + i + ',\'weight\',Number(this.value))"></div>' +
+      '<div class="field mb0" style="flex:1;"><label>Descanso (seg)</label><input type="number" value="' + ex.restSeconds + '" onchange="updateDraftField(' + i + ',\'restSeconds\',Number(this.value))"></div>' +
+      '</div>' +
+      '<div class="field mb0"><label>Notas</label><input value="' + esc(ex.notes || '') + '" onchange="updateDraftField(' + i + ',\'notes\',this.value)"></div>' +
+      '<div class="btn-row" style="margin-top:12px;"><button class="btn btn-ghost btn-sm" style="color:var(--danger);" onclick="removeDraftExercise(' + i + ')">Omitir de hoy</button></div>' +
+      '</div>';
+  });
+  html += '<button class="btn btn-secondary" onclick="addDraftExercise()">＋ Añadir ejercicio</button>';
+
+  if (d.wod) {
+    html += '<div class="section-label">WOD</div><div class="card">' +
+      '<div class="row-between"><span class="ex-name">' + esc(d.wod.wodType) + '</span>' +
+      '<label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-soft);">Incluir hoy <button class="toggle ' + (d.wodIncluded ? '' : 'off') + '" onclick="toggleDraftWod()"></button></label></div>';
+    d.wod.exercises.forEach(function (m, i) {
+      html += '<div class="wod-move"><input style="border:none;background:transparent;font-size:14.5px;width:60%;" value="' + esc(m.exercise_name) + '" onchange="updateDraftWodMove(' + i + ',\'exercise_name\',this.value)">' +
+        '<input style="border:none;background:transparent;font-size:14.5px;width:35%;text-align:right;" value="' + esc(m.reps) + '" onchange="updateDraftWodMove(' + i + ',\'reps\',this.value)"></div>';
+    });
+    html += '</div>';
+  }
+  el('editorContent').innerHTML = html;
+}
+
+function updateDraftField(i, field, value) { APP.editorDraft.exercises[i][field] = value; }
+function moveDraftExercise(i, dir) {
+  var arr = APP.editorDraft.exercises; var j = i + dir;
+  if (j < 0 || j >= arr.length) return;
+  var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+  renderEditor();
+}
+function removeDraftExercise(i) { APP.editorDraft.exercises.splice(i, 1); renderEditor(); }
+function addDraftExercise() {
+  APP.editorDraft.exercises.push({ exerciseName: 'Nuevo ejercicio', sets: 3, reps: '10', weight: 0, weightType: 'ABSOLUTE_KG', restSeconds: 60, unit: 'kg', notes: '' });
+  renderEditor();
+}
+function toggleDraftWod() { APP.editorDraft.wodIncluded = !APP.editorDraft.wodIncluded; renderEditor(); }
+function updateDraftWodMove(i, field, value) { APP.editorDraft.wod.exercises[i][field] = value; }
+
+function onStartSessionClick() { startSessionFromDraft(); }
+
+function startSessionFromDraft() {
+  var d = APP.editorDraft;
+  if (!d || d.exercises.length === 0) { showError(new Error('Añade al menos un ejercicio antes de empezar.')); return; }
+  showLoading();
+  var planWod = (d.wodIncluded && d.wod) ? { wodType: d.wod.wodType, structure: d.wod.structure } : null;
+  gs('startSession', d.exercises, planWod, '').then(function (res) {
+    APP.currentSessionId = res.sessionId;
+    APP.editorDraft = null;
+    requestWakeLock_();
+    return loadCalentamiento_();
+  }).catch(showError).then(hideLoading);
+}
+
+/* ============================================================================================
+ * 4. CALENTAMIENTO
+ * ==========================================================================================*/
+
+function loadCalentamiento_() {
+  // Refresca el estado de la sesión ANTES de pintar el calentamiento: si no, el cronómetro
+  // global se queda fijo en 00:00 porque tickGlobalClock_ no tiene APP.sessionState todavía.
+  return refreshSessionState_().then(function () {
+    var warmup = APP.today && APP.today.warmup;
+    renderCalentamiento(warmup);
+    goScreen('calentamiento');
+  });
+}
+
+var warmupChecks = {};
+function renderCalentamiento(warmup) {
+  warmupChecks = {};
+  var sectionLabel = { MOVILIDAD_ARTICULAR: 'Movilidad articular', ACTIVACION_GENERAL: 'Activación general', ACTIVACION_ESPECIFICA: 'Activación específica' };
+  var html = '<div class="session-clock" id="calSessionClock">⏱ Sesión 00:00</div>';
+  if (!warmup) {
+    html += '<div class="empty-state">No hay calentamiento configurado para este día.</div>';
+  } else {
+    ['MOVILIDAD_ARTICULAR', 'ACTIVACION_GENERAL', 'ACTIVACION_ESPECIFICA'].forEach(function (sec) {
+      var items = warmup[sec] || [];
+      if (items.length === 0) return;
+      html += '<div class="h2">' + sectionLabel[sec] + '</div><div class="card">';
+      items.forEach(function (it, i) {
+        var key = sec + '_' + i;
+        html += '<div class="warm-item" onclick="toggleWarmupItem(\'' + key + '\')"><div class="check-circle" id="wu_' + key + '">✓</div><div><b>' + esc(it.name) + '</b><div class="ex-meta">' + esc(it.reps_or_duration) + '</div></div></div>';
+      });
+      html += '</div>';
+    });
+  }
+  el('calentamientoContent').innerHTML = html;
+  startGlobalClockTicker_('calSessionClock');
+}
+function toggleWarmupItem(key) {
+  warmupChecks[key] = !warmupChecks[key];
+  el('wu_' + key).classList.toggle('done', !!warmupChecks[key]);
+}
+
+/* ============================================================================================
+ * Cronómetro global de sesión
+ * ==========================================================================================*/
+
+function startGlobalClockTicker_(targetElId) {
+  clearInterval(APP.timers.global);
+  tickGlobalClock_(targetElId);
+  APP.timers.global = setInterval(function () { tickGlobalClock_(targetElId); }, 1000);
+}
+function stopGlobalClockTicker_() { clearInterval(APP.timers.global); }
+function tickGlobalClock_(targetElId) {
+  if (!APP.sessionState) return;
+  var s = APP.sessionState.session;
+  var elapsed = Number(APP.sessionState.activeElapsedSeconds) || 0;
+  if (s.status === 'IN_PROGRESS' && s.last_resume_time) {
+    elapsed += Math.round((Date.now() - new Date(s.last_resume_time).getTime()) / 1000);
+  }
+  var t = el(targetElId);
+  if (t) t.textContent = '⏱ Sesión ' + formatMMSS(elapsed);
+}
+
+function refreshSessionState_() {
+  return gs('getSessionState', APP.currentSessionId).then(function (state) {
+    APP.sessionState = state;
+    return state;
+  });
+}
+
+/* ============================================================================================
+ * 5. EJERCICIO ACTIVO
+ * ==========================================================================================*/
+
+function goToCurrentStep() {
+  showLoading();
+  refreshSessionState_().then(function (state) {
+    if (state.rest) { renderDescanso(state.rest); goScreen('descanso'); return; }
+    if (!state.current) {
+      // no quedan ejercicios pendientes: toca WOD si existe y no está terminado, o resultado
+      if (state.wod && state.wod.status !== 'COMPLETED' && state.wod.status !== 'SKIPPED') { openWod(); return; }
+      finishAndShowResult_();
+      return;
+    }
+    renderEjercicio(state);
+    goScreen('ejercicio');
+  }).catch(showError).then(hideLoading);
+}
+
+function renderEjercicio(state) {
+  var current = state.current;
+  var ex = state.exercises.filter(function (e) { return e.id === current.exerciseId; })[0];
+  if (!ex) { showError(new Error('No se pudo cargar el ejercicio actual. Vuelve a Hoy e inténtalo de nuevo.')); goHoy(); return; }
+  var idx = state.exercises.indexOf(ex) + 1;
+  el('ejercicioTitleBar').textContent = 'Ejercicio ' + idx + ' / ' + state.exercises.length;
+
+  var repRangeLabel = (ex.min_reps != null && ex.max_reps != null)
+    ? (ex.min_reps + '–' + ex.max_reps + ' reps')
+    : (esc(ex.reps_planned) + ' reps');
+  var rirLabel = '';
+  if (ex.target_rir_min != null && ex.target_rir_max != null) {
+    rirLabel = (Number(ex.target_rir_min) === Number(ex.target_rir_max))
+      ? (' · RIR ' + ex.target_rir_min) : (' · RIR ' + ex.target_rir_min + '–' + ex.target_rir_max);
+  }
+  var categoryTag = ex.category === 'ACCESORIO' ? ' <span class="pill" style="font-size:10.5px;padding:3px 9px;vertical-align:middle;">Accesorio</span>' : '';
+  var defaultRir = (ex.target_rir_min != null && ex.target_rir_max != null)
+    ? Math.round((Number(ex.target_rir_min) + Number(ex.target_rir_max)) / 2) : '';
+
+  var html =
+    '<div class="session-clock" id="ejSessionClock">⏱ Sesión 00:00</div>' +
+    '<div class="center" style="margin-top:14px;"><div class="h1" style="font-size:30px;">' + esc(ex.exercise_name) + categoryTag + '</div>' +
+    '<div class="sub" style="font-size:15px;">' + repRangeLabel + rirLabel + ' · <b style="color:var(--primary-darker);">' + esc(weightLabel(ex.weight_planned, ex.weight_type, ex.unit)) + '</b></div></div>' +
+    '<div class="card center"><div class="timer-label">Serie</div><div class="timer-big small">' + (current.setNumber - 1) + ' / ' + ex.sets_planned + '</div></div>' +
+    '<div class="card">' +
+    '<div class="btn-row" style="margin-bottom:10px;">' +
+    '<div class="field mb0" style="flex:1;"><label>Peso real</label><input type="number" step="0.5" id="inpWeightActual" value="' + (ex.weight_planned || 0) + '"></div>' +
+    '<div class="field mb0" style="flex:1;"><label>Reps reales</label><input type="number" id="inpRepsActual" value="' + (parseInt(ex.reps_planned, 10) || '') + '"></div>' +
+    '</div>' +
+    '<div class="field mb0" style="margin-bottom:10px;"><label>RIR real (reps en reserva)</label><input type="number" min="0" max="5" id="inpRirActual" value="' + defaultRir + '" placeholder="0 = fallo"></div>' +
+    '<label style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--danger);font-weight:700;"><input type="checkbox" id="chkFail"> Marcar como fallo</label>' +
+    '</div>';
+  el('ejercicioContent').innerHTML = html;
+  el('ejercicioCta').innerHTML =
+    '<button class="btn btn-outline" onclick="onSkipExerciseClick(\'' + ex.id + '\')">Omitir ejercicio</button>' +
+    '<button class="btn btn-primary" onclick="onCompleteSetClick(\'' + ex.id + '\', ' + current.setNumber + ')">✓ Completar serie</button>';
+  startGlobalClockTicker_('ejSessionClock');
+}
+
+function onCompleteSetClick(exerciseId, setNumber) {
+  var weight = Number(el('inpWeightActual').value);
+  var reps = Number(el('inpRepsActual').value);
+  var failed = el('chkFail').checked;
+  var rirEl = el('inpRirActual');
+  var rirActual = (rirEl && rirEl.value !== '') ? Number(rirEl.value) : (failed ? 0 : null);
+  showLoading();
+  gs('logSet', exerciseId, setNumber, weight, reps, failed ? 'FAILED' : 'COMPLETED', '', rirActual).then(function (res) {
+    vibrate(30);
+    if (res.sessionAutoCompleted) { finishAndShowResult_(res.finishResult); return; }
+    goToCurrentStep();
+  }).catch(showError).then(hideLoading);
+}
+
+function onSkipExerciseClick(exerciseId) {
+  confirmDialog('¿Omitir este ejercicio?', 'Quedará registrado como omitido.', 'Omitir', function () {
+    showLoading();
+    gs('skipExercise', exerciseId).then(function (res) {
+      if (res.sessionAutoCompleted) { finishAndShowResult_(res.finishResult); return; }
+      goToCurrentStep();
+    }).catch(showError).then(hideLoading);
+  });
+}
+
+/* ============================================================================================
+ * 6. DESCANSO
+ * ==========================================================================================*/
+
+function renderDescanso(rest) {
+  el('descansoContent').innerHTML =
+    '<div class="session-clock" id="descSessionClock">⏱ Sesión 00:00</div>' +
+    '<div class="timer-ring"><div class="timer-label">Descanso</div><div class="timer-big small" id="restCountdown">00:00</div></div>' +
+    '<div class="hint">Sonido y vibración al finalizar · cuenta atrás final de 3s</div>' +
+    '<div class="center" style="margin-top:16px;"><button class="btn btn-outline" style="width:auto;padding:14px 26px;" onclick="onSkipRestClick()">⏭ Saltar descanso</button></div>';
+  startGlobalClockTicker_('descSessionClock');
+  startRestTicker_(rest.restEndTime);
+}
+
+var restBeepedFinal = false;
+function startRestTicker_(restEndTimeIso) {
+  clearInterval(APP.timers.rest);
+  restBeepedFinal = false;
+  var lastWholeSecond = null;
+  function tick() {
+    var remaining = Math.round((new Date(restEndTimeIso).getTime() - Date.now()) / 1000);
+    if (remaining <= 0) {
+      el('restCountdown').textContent = '00:00';
+      if (!restBeepedFinal) { restBeepedFinal = true; beepFinal(); vibrate([120, 60, 120]); }
+      clearInterval(APP.timers.rest);
+      setTimeout(function () { onSkipRestClick(); }, 500);
+      return;
+    }
+    if (remaining <= 3 && remaining !== lastWholeSecond) { beepCountdownTick(); vibrate(40); }
+    lastWholeSecond = remaining;
+    el('restCountdown').textContent = formatMMSS(remaining);
+  }
+  tick();
+  APP.timers.rest = setInterval(tick, 250);
+}
+
+function onSkipRestClick() {
+  clearInterval(APP.timers.rest);
+  showLoading();
+  gs('skipRestNow', APP.currentSessionId).then(function () { goToCurrentStep(); }).catch(showError).then(hideLoading);
+}
+
+/* ============================================================================================
+ * 7. PAUSA
+ * ==========================================================================================*/
+
+function onPauseClick() {
+  showLoading();
+  gs('pauseSession', APP.currentSessionId).then(function () {
+    releaseWakeLock_();
+    return refreshSessionState_();
+  }).then(function (state) {
+    renderPausa(state);
+    goScreen('pausa');
+  }).catch(showError).then(hideLoading);
+}
+
+function renderPausa(state) {
+  el('pausaContent').innerHTML =
+    '<div class="center" style="padding-top:30px;"><div style="font-size:46px;">⏸</div>' +
+    '<div class="h1">Entrenamiento en pausa</div>' +
+    '<p class="sub">El tiempo de pausa no cuenta para el cronómetro global.</p></div>' +
+    '<div class="card"><div class="row-between"><span class="ex-meta">Tiempo activo hasta ahora</span><b>' + formatMMSS(state.activeElapsedSeconds) + '</b></div></div>';
+}
+
+function onResumeClick() {
+  showLoading();
+  gs('resumeSession', APP.currentSessionId).then(function () { requestWakeLock_(); goToCurrentStep(); }).catch(showError).then(hideLoading);
+}
+
+/* ============================================================================================
+ * 8. WOD — motor genérico. structure define el comportamiento; el cliente calcula todo a
+ * partir de marcas de tiempo (startedAt), nunca de contadores guardados, para que sobreviva
+ * a un cierre accidental del navegador.
+ * ==========================================================================================*/
+
+function openWod() {
+  showLoading();
+  refreshSessionState_().then(function (state) {
+    var wod = state.wod;
+    if (!wod) { finishAndShowResult_(); return; }
+    if (wod.status === 'NOT_STARTED') {
+      return gs('startWod', APP.currentSessionId).then(function () { return refreshSessionState_(); }).then(function (s2) { renderWod_(s2.wod); goScreen('wod'); });
+    }
+    renderWod_(wod);
+    goScreen('wod');
+  }).catch(showError).then(hideLoading);
+}
+
+function renderWod_(wod) {
+  APP.wod = { type: wod.wod_type, structure: wod.structure, startedAt: wod.started_at, exercises: getWodExercisesFromToday_() };
+  clearInterval(APP.timers.wod);
+  var movesHtml = APP.wod.exercises.map(function (m) {
+    return '<div class="wod-move"><span>' + esc(m.reps) + ' ' + esc(m.exercise_name) + '</span><span>' + esc(weightLabel(m.weight_value, m.weight_type, m.unit)) + '</span></div>';
+  }).join('');
+
+  var header = '<div class="center"><span class="badge badge-info">' + wodBadgeLabel_(wod.wod_type, wod.structure) + '</span></div>';
+  var body = '<div id="wodTimerZone"></div><div class="card">' + movesHtml + '</div><div id="wodExtra"></div>';
+  el('wodContent').innerHTML = header + body;
+
+  var type = wod.wod_type;
+  if (type === 'AMRAP') runAmrapEngine_(wod);
+  else if (type === 'FOR_TIME' || type === 'ROUNDS' || type === 'LADDER_21_15_9' || type === 'RFT' || type === 'CHIPPER') runForTimeEngine_(wod);
+  else if (type === 'EMOM' || type === 'INTERVALS') runEmomEngine_(wod);
+  else if (type === 'TABATA') runTabataEngine_(wod);
+  else runManualResultEngine_(wod); // MAX_REPS, TIME, DISTANCE
+
+  el('wodCta').innerHTML =
+    '<button class="btn btn-outline" onclick="onSkipWodClick()">Omitir WOD</button>' +
+    '<button class="btn btn-primary" id="wodFinishBtn" onclick="onFinishWodClick()">Finalizar WOD</button>';
+}
+
+function getWodExercisesFromToday_() {
+  if (APP.today && APP.today.wod) return APP.today.wod.exercises;
+  return [];
+}
+function wodBadgeLabel_(type, s) {
+  if (type === 'AMRAP') return 'AMRAP ' + formatMMSS(s.duration_seconds);
+  if (type === 'EMOM') return 'EMOM ' + s.total_minutes + "'";
+  if (type === 'TABATA') return 'TABATA · ' + s.rounds + ' rondas';
+  if (type === 'FOR_TIME') return 'FOR TIME · ' + (s.rounds || '') + ' rondas';
+  if (type === 'LADDER_21_15_9') return '21-15-9';
+  if (type === 'ROUNDS') return 'RONDAS · ' + (s.rounds || '');
+  if (type === 'RFT') return (s.rounds || '') + ' RONDAS FOR TIME';
+  if (type === 'CHIPPER') return 'CHIPPER';
+  if (type === 'INTERVALS') return 'INTERVALOS';
+  if (type === 'MAX_REPS') return 'MÁXIMAS REPETICIONES';
+  return type;
+}
+
+function elapsedWodSeconds_() {
+  return Math.round((Date.now() - new Date(APP.wod.startedAt).getTime()) / 1000);
+}
+
+/* AMRAP: cuenta atrás única; al llegar a 0, se pide registrar rondas + reps extra. */
+function runAmrapEngine_(wod) {
+  function tick() {
+    var remaining = wod.structure.duration_seconds - elapsedWodSeconds_();
+    if (remaining <= 0) {
+      el('wodTimerZone').innerHTML = '<div class="timer-ring"><div class="timer-label">Tiempo</div><div class="timer-big small">00:00</div></div>';
+      if (!APP._amrapEnded) { APP._amrapEnded = true; beepFinal(); vibrate([150, 80, 150]); }
+      clearInterval(APP.timers.wod);
+      return;
+    }
+    if (remaining <= 3) beepCountdownTick();
+    el('wodTimerZone').innerHTML = '<div class="timer-ring"><div class="timer-label">Tiempo restante</div><div class="timer-big small">' + formatMMSS(remaining) + '</div></div>';
+  }
+  APP._amrapEnded = false;
+  tick();
+  APP.timers.wod = setInterval(tick, 1000);
+}
+
+/* FOR TIME / ROUNDS / 21-15-9: cronómetro ascendente + botón TAP opcional para contar rondas. */
+var wodTapCount = 0;
+function runForTimeEngine_(wod) {
+  wodTapCount = 0;
+  function tick() {
+    var elapsed = elapsedWodSeconds_();
+    var cap = wod.structure.cap_seconds;
+    var overCap = cap && elapsed >= cap;
+    el('wodTimerZone').innerHTML = '<div class="timer-ring' + (overCap ? '' : '') + '"><div class="timer-label">' + (overCap ? 'Tiempo tope alcanzado' : 'Tiempo transcurrido') + '</div><div class="timer-big small">' + formatMMSS(elapsed) + '</div></div>';
+  }
+  tick();
+  APP.timers.wod = setInterval(tick, 1000);
+  el('wodExtra').innerHTML = '<div class="center" style="margin:14px 0;"><button class="btn btn-secondary" style="width:auto;padding:14px 30px;" onclick="wodTap_()">Ronda <span id="wodTapCount">0</span> · TAP</button></div>';
+}
+function wodTap_() { wodTapCount++; el('wodTapCount').textContent = wodTapCount; vibrate(20); }
+
+/* EMOM / INTERVALS: controla minutos/intervalos automáticamente. */
+function runEmomEngine_(wod) {
+  var moves = APP.wod.exercises.length > 0 ? APP.wod.exercises : [{ exercise_name: 'Trabajo' }];
+  var interval = wod.structure.interval_seconds || 60;
+  var totalUnits = wod.structure.total_minutes || wod.structure.rounds || 10;
+  function tick() {
+    var elapsed = elapsedWodSeconds_();
+    var unitIndex = Math.floor(elapsed / interval);
+    var into = elapsed % interval;
+    var remaining = interval - into;
+    if (unitIndex >= totalUnits) {
+      el('wodTimerZone').innerHTML = '<div class="emom-current"><div class="lbl">Terminado</div><div class="move">¡Buen trabajo!</div></div>';
+      if (!APP._emomEnded) { APP._emomEnded = true; beepFinal(); vibrate([150, 80, 150]); }
+      clearInterval(APP.timers.wod);
+      return;
+    }
+    if (into === 0) { beepCountdownTick(); vibrate(60); }
+    var move = moves[unitIndex % moves.length];
+    el('wodTimerZone').innerHTML = '<div class="emom-current"><div class="lbl">Minuto ' + (unitIndex + 1) + ' de ' + totalUnits + '</div>' +
+      '<div class="move">' + esc(move.reps || '') + ' ' + esc(move.exercise_name) + '</div>' +
+      '<div class="timer-big small" style="color:#fff;margin:6px 0 0;">' + formatMMSS(remaining) + '</div></div>';
+  }
+  APP._emomEnded = false;
+  tick();
+  APP.timers.wod = setInterval(tick, 1000);
+}
+
+/* TABATA: intervalos trabajo/descanso con cambio automático. */
+function runTabataEngine_(wod) {
+  var work = wod.structure.work_seconds, rest = wod.structure.rest_seconds, rounds = wod.structure.rounds;
+  var cycle = work + rest;
+  function tick() {
+    var elapsed = elapsedWodSeconds_();
+    var roundIndex = Math.floor(elapsed / cycle);
+    var into = elapsed % cycle;
+    if (roundIndex >= rounds) {
+      el('wodTimerZone').innerHTML = '<div class="timer-ring"><div class="tabata-phase">¡Terminado!</div></div>';
+      if (!APP._tabataEnded) { APP._tabataEnded = true; beepFinal(); vibrate([150, 80, 150]); }
+      clearInterval(APP.timers.wod);
+      return;
+    }
+    var inWork = into < work;
+    var remaining = inWork ? (work - into) : (cycle - into);
+    if (into === 0) { beepCountdownTick(); vibrate(60); }
+    if (!inWork && into === work) { beepCountdownTick(); vibrate(40); }
+    el('wodTimerZone').innerHTML = '<div class="center"><span class="badge badge-info">Ronda ' + (roundIndex + 1) + ' / ' + rounds + '</span></div>' +
+      '<div class="timer-ring" style="border-top-color:' + (inWork ? 'var(--success)' : 'var(--warning)') + ';">' +
+      '<div class="tabata-phase ' + (inWork ? 'tabata-work' : 'tabata-rest') + '">' + (inWork ? 'TRABAJO' : 'DESCANSO') + '</div>' +
+      '<div class="timer-big small">' + formatMMSS(remaining) + '</div></div>';
+  }
+  APP._tabataEnded = false;
+  tick();
+  APP.timers.wod = setInterval(tick, 1000);
+}
+
+/* MAX_REPS / TIME / DISTANCE: sin temporizador automático obligatorio, resultado manual. */
+function runManualResultEngine_(wod) {
+  el('wodTimerZone').innerHTML = '<div class="hint">Introduce el resultado cuando termines.</div>';
+}
+
+function onSkipWodClick() {
+  confirmDialog('¿Omitir el WOD?', 'Quedará registrado como omitido.', 'Omitir', function () {
+    clearInterval(APP.timers.wod);
+    showLoading();
+    gs('skipWod', APP.currentSessionId).then(function (res) {
+      if (res.sessionAutoCompleted) { finishAndShowResult_(res.finishResult); return; }
+      loadToday();
+    }).catch(showError).then(hideLoading);
+  });
+}
+
+function onFinishWodClick() {
+  clearInterval(APP.timers.wod);
+  var type = APP.wod.type;
+  var result = {};
+  if (type === 'AMRAP') {
+    var rounds = prompt('¿Cuántas rondas completas hiciste?', '0');
+    if (rounds === null) { return; }
+    var extra = prompt('¿Reps extra en la ronda incompleta? (0 si ninguna)', '0');
+    result = { rounds: Number(rounds) || 0, extraReps: Number(extra) || 0 };
+  } else if (type === 'FOR_TIME' || type === 'ROUNDS' || type === 'LADDER_21_15_9' || type === 'RFT' || type === 'CHIPPER') {
+    result = { timeSeconds: elapsedWodSeconds_(), rounds: wodTapCount };
+  } else if (type === 'MAX_REPS') {
+    var reps = prompt('¿Cuántas repeticiones totales?', '0');
+    if (reps === null) return;
+    result = { reps: Number(reps) || 0 };
+  } else if (type === 'TIME') {
+    var t = prompt('Tiempo final (segundos):', String(elapsedWodSeconds_()));
+    if (t === null) return;
+    result = { timeSeconds: Number(t) || 0 };
+  } else if (type === 'DISTANCE') {
+    var dist = prompt('Distancia recorrida (metros):', '0');
+    if (dist === null) return;
+    result = { distanceMeters: Number(dist) || 0 };
+  } else {
+    result = { rounds: wodTapCount, elapsedSeconds: elapsedWodSeconds_() };
+  }
+  showLoading();
+  gs('finishWod', APP.currentSessionId, 'COMPLETED', result, '').then(function (res) { finishAndShowResult_(res.finishResult); }).catch(showError).then(hideLoading);
+}
+
+/* ============================================================================================
+ * 9. RESULTADO (completado / incompleto) y finalización anticipada
+ * ==========================================================================================*/
+
+/* precomputed: si la sesión ya se cerró antes de llamar acá (auto-completada al registrar el
+ * último set, al saltar el último ejercicio, o al terminar el WOD), viene con el resultado real
+ * de finishSession (incluyendo phaseCompleted/nextPhaseSuggestion si corresponde) — así se evita
+ * llamar a finishSession dos veces y perder esa información en el segundo llamado (que solo
+ * devolvería {alreadyFinished:true}). Si no viene, es un cierre manual (botón "Finalizar
+ * entrenamiento") y se llama a finishSession acá por primera y única vez. */
+function finishAndShowResult_(precomputed) {
+  if (precomputed && precomputed.status) {
+    stopGlobalClockTicker_();
+    releaseWakeLock_();
+    return renderResultado_(precomputed.status, precomputed);
+  }
+  showLoading();
+  return gs('finishSession', APP.currentSessionId, '').then(function (res) {
+    stopGlobalClockTicker_();
+    releaseWakeLock_();
+    return renderResultado_(res.status, res);
+  }).catch(showError).then(hideLoading);
+}
+
+function renderResultado_(status, finishInfo) {
+  return refreshSessionState_().then(function (state) {
+    var s = state.session;
+    var exercisesDone = state.exercises.filter(function (e) { return e.status === 'COMPLETED' || e.status === 'SKIPPED'; }).length;
+    var wodBadge = !state.wod ? '—' : (state.wod.status === 'COMPLETED' ? '✓' : (state.wod.status === 'SKIPPED' ? 'Omitido' : 'Pendiente'));
+    var isComplete = status === 'COMPLETED';
+    var phaseHtml = '';
+    if (finishInfo && finishInfo.phaseCompleted) {
+      phaseHtml = '<div class="card" style="border-color:var(--primary);text-align:center;">' +
+        '<div style="font-size:32px;">🏆</div>' +
+        '<div class="h1" style="font-size:19px;">¡Felicidades! Terminaste la fase "' + esc(finishInfo.finishedPhaseName) + '"</div>' +
+        (finishInfo.nextPhaseSuggestion ?
+          '<p class="sub">Según tu rotación, ahora toca: <b style="color:var(--primary-darker);">' + esc(finishInfo.nextPhaseSuggestion) + '</b></p>' +
+          '<button class="btn btn-secondary" style="width:auto;padding:12px 22px;margin-top:6px;" onclick="goScreen(\'fases\')">Ir a Fases</button>' :
+          '<p class="sub">Cuando tengas la próxima fase lista, activala desde la pantalla Fases.</p>') +
+        '</div>';
+    }
+    var html = phaseHtml +
+      '<div class="center" style="font-size:44px;">' + (isComplete ? '✅' : '⚠️') + '</div>' +
+      '<div class="h1 center">' + (isComplete ? '¡Entrenamiento completado!' : 'Entrenamiento incompleto') + '</div>' +
+      '<p class="sub center">' + esc(s.day_name) + '</p>' +
+      '<div class="kpi-row"><div class="kpi"><div class="num">' + formatMMSS(state.activeElapsedSeconds) + '</div><div class="lbl">Tiempo total</div></div>' +
+      '<div class="kpi"><div class="num">' + exercisesDone + '/' + state.exercises.length + '</div><div class="lbl">Ejercicios</div></div>' +
+      '<div class="kpi"><div class="num">' + wodBadge + '</div><div class="lbl">WOD</div></div></div>' +
+      '<div class="card">' + state.exercises.map(function (e) {
+        var badge = e.status === 'COMPLETED' ? '<span class="badge badge-success">Completo</span>' :
+          e.status === 'SKIPPED' ? '<span class="badge badge-warning">Omitido</span>' :
+          '<span class="badge badge-neutral">' + (e.sets.length) + '/' + e.sets_planned + ' series</span>';
+        return '<div class="ex-item"><span>' + esc(e.exercise_name) + '</span>' + badge + '</div>';
+      }).join('') + '</div>' +
+      '<div class="field"><label>Nota de la sesión (opcional)</label><textarea rows="2" id="inpSessionNote" placeholder="Ej. hoy dormí mal…">' + esc(s.session_note || '') + '</textarea></div>';
+    el('resultadoContent').innerHTML = html;
+    goScreen('resultado');
+  });
+}
+
+function onCloseResultClick() {
+  var note = el('inpSessionNote') ? el('inpSessionNote').value : '';
+  showLoading();
+  gs('saveSessionNote', APP.currentSessionId, note).then(function () {
+    APP.currentSessionId = null;
+    APP.sessionState = null;
+    return loadToday();
+  }).catch(showError).then(hideLoading);
+}
+
+function confirmFinishEarly() {
+  refreshSessionState_().then(function (state) {
+    var done = state.exercises.filter(function (e) { return e.status === 'COMPLETED' || e.status === 'SKIPPED'; }).length;
+    var wodLabel = !state.wod ? '' : (state.wod.status === 'NOT_STARTED' ? 'Pendiente' : state.wod.status);
+    var body = '<div class="center" style="font-size:30px;">⚠️</div>' +
+      '<div class="h2 center">¿Seguro que quieres finalizar?</div>' +
+      '<p class="sub center">Has completado ' + done + ' de ' + state.exercises.length + ' ejercicios.' + (state.wod ? '<br>WOD: ' + esc(wodLabel) + '.' : '') + '</p>';
+    openModal(body, [
+      { label: 'Cancelar', cls: 'btn-outline', action: closeModal },
+      { label: 'Finalizar', cls: 'btn-danger', action: function () { closeModal(); finishAndShowResult_(); } }
+    ]);
+  }).catch(showError);
+}
+
+/* ============================================================================================
+ * 10. RECUPERACIÓN
+ * ==========================================================================================*/
+
+function renderRecuperacion(summary) {
+  APP.currentSessionId = summary.sessionId;
+  var html = '<div class="card" style="background:var(--warning-tint);border:1px solid #F0D19E;">' +
+    '<div class="row-between" style="margin-bottom:8px;"><span style="font-size:20px;">⚠️</span>' +
+    '<span class="badge badge-warning">' + (summary.isStale ? 'Sesión de otro día' : 'Sesión sin terminar') + '</span></div>' +
+    '<div class="h2">Tienes un entrenamiento en curso</div><p class="sub">' + esc(summary.dayName) + '</p><div class="divider"></div>' +
+    '<div class="ex-item"><span>Iniciado</span><span class="ex-right">' + new Date(summary.startTime).toLocaleString() + '</span></div>' +
+    (summary.lastExerciseName ? '<div class="ex-item"><span>Último ejercicio</span><span class="ex-right">' + esc(summary.lastExerciseName) + '</span></div>' : '') +
+    '<div class="ex-item"><span>Tiempo activo</span><span class="ex-right">' + formatMMSS(summary.activeElapsedSeconds) + '</span></div></div>';
+  el('recuperacionContent').innerHTML = html;
+
+  if (summary.isStale) {
+    el('recuperacionCta').innerHTML =
+      '<button class="btn btn-outline" onclick="onAbandonStaleSession_()">Abandonar (no era de hoy)</button>' +
+      '<button class="btn btn-primary" onclick="onContinueRecovery_()">▶ Continuar igualmente</button>';
+  } else {
+    el('recuperacionCta').innerHTML =
+      '<button class="btn btn-outline" onclick="confirmFinishEarly()">Finalizar esa sesión</button>' +
+      '<button class="btn btn-primary" onclick="onContinueRecovery_()">▶ Continuar entrenamiento</button>';
+  }
+}
+
+function onContinueRecovery_() { requestWakeLock_(); goToCurrentStep(); }
+function onAbandonStaleSession_() {
+  confirmDialog('¿Abandonar esta sesión?', 'No hará avanzar tu rotación: el día seguirá disponible para más adelante. Quedará en el historial como abandonada.', 'Abandonar', function () {
+    showLoading();
+    gs('abandonSession', APP.currentSessionId).then(function () {
+      releaseWakeLock_();
+      APP.currentSessionId = null;
+      return loadToday();
+    }).catch(showError).then(hideLoading);
+  });
+}
+
+/* ============================================================================================
+ * 11. HISTORIAL
+ * ==========================================================================================*/
+
+function renderHistorial() {
+  showLoading();
+  gs('getHistory').then(function (rows) {
+    rows = rows || [];
+    APP.historyCache = rows;
+    if (rows.length === 0) { el('historialContent').innerHTML = '<div class="empty-state">Todavía no hay entrenamientos registrados.</div>'; return; }
+    var statusBadge = { COMPLETED: 'badge-success', INCOMPLETE: 'badge-warning', ABANDONED: 'badge-danger' };
+    var html = '<div class="card">' + rows.map(function (r) {
+      var label = r.status === 'COMPLETED' ? r.durationLabel : (r.status === 'INCOMPLETE' ? 'Incompleto' : 'Abandonada');
+      return '<div class="history-row" onclick="openHistorialDetalle(\'' + r.sessionId + '\')">' +
+        '<div><div class="history-date">' + esc(r.date) + '</div><div class="history-name">Día ' + r.dayNumber + ' · ' + esc(r.dayName) + '</div></div>' +
+        '<span class="badge ' + (statusBadge[r.status] || 'badge-neutral') + '">' + esc(label) + '</span></div>';
+    }).join('') + '</div>';
+    el('historialContent').innerHTML = html;
+  }).catch(showError).then(hideLoading);
+}
+
+function openHistorialDetalle(sessionId) {
+  showLoading();
+  gs('getHistoryDetail', sessionId).then(function (detail) {
+    el('historialDetalleTitle').textContent = detail.session.date + ' · Día ' + detail.session.day_number;
+    var exercisesDone = detail.exercises.filter(function (e) { return e.status === 'COMPLETED'; }).length;
+    var html = '<div class="kpi-row"><div class="kpi"><div class="num">' + detail.durationLabel + '</div><div class="lbl">Duración</div></div>' +
+      '<div class="kpi"><div class="num">' + exercisesDone + '/' + detail.exercises.length + '</div><div class="lbl">Ejercicios</div></div>' +
+      '<div class="kpi"><div class="num">' + (detail.wod ? (detail.wod.status === 'COMPLETED' ? '✓' : detail.wod.status) : '—') + '</div><div class="lbl">WOD</div></div></div>';
+    detail.exercises.forEach(function (ex) {
+      html += '<div class="card"><div class="ex-name">' + esc(ex.exercise_name) + '</div>';
+      if (ex.sets.length === 0) html += '<div class="ex-meta">Sin series registradas' + (ex.status === 'SKIPPED' ? ' · omitido' : '') + '</div>';
+      ex.sets.forEach(function (s) {
+        var cls = s.status === 'FAILED' ? 'fail' : (s.status === 'COMPLETED' ? 'done' : '');
+        var badge = s.status === 'FAILED' ? '<span class="badge badge-danger">Fallo</span>' : '<span class="badge badge-success">✓</span>';
+        html += '<div class="set-row ' + cls + '"><span class="set-num">Serie ' + s.set_number + '</span><span class="set-val">' + s.weight_actual + ' kg × ' + s.reps_actual + '</span>' + badge + '</div>';
+      });
+      if (ex.notes) html += '<div class="ex-meta">Nota: "' + esc(ex.notes) + '"</div>';
+      html += '</div>';
+    });
+    if (detail.wod) {
+      html += '<div class="card"><div class="row-between mb0"><b>WOD · ' + esc(detail.wod.wod_type) + '</b><span class="badge badge-success">' + esc(detail.wod.status) + '</span></div>' +
+        (detail.wod.note ? '<div class="ex-meta">' + esc(detail.wod.note) + '</div>' : '') + '</div>';
+    }
+    if (detail.session.session_note) html += '<div class="card"><div class="ex-meta">Nota de sesión: "' + esc(detail.session.session_note) + '"</div></div>';
+    el('historialDetalleContent').innerHTML = html;
+    goScreen('historial-detalle');
+  }).catch(showError).then(hideLoading);
+}
+
+/* ============================================================================================
+ * 12. FASES
+ * ==========================================================================================*/
+
+function renderFases() {
+  showLoading();
+  Promise.all([gs('getPhasesList'), gs('getRmsView')]).then(function (results) {
+    var phases = results[0] || [], rms = results[1] || [];
+    APP.phasesCache = phases;
+    var html = phases.map(function (p) {
+      return '<div class="card phase-card ' + (p.status === 'ACTIVE' ? 'active' : '') + '">' +
+        '<div class="row-between mb0" style="margin-bottom:6px;"><b>' + esc(p.name) + '</b>' +
+        '<span class="badge ' + (p.status === 'ACTIVE' ? 'badge-success' : 'badge-neutral') + '">' + (p.status === 'ACTIVE' ? 'Activa' : 'Archivada') + '</span></div>' +
+        '<div class="ex-meta">' + (p.status === 'ACTIVE' ? ('Semana ' + p.currentWeekNumber + ' de ' + p.weeks) : (p.weeks + ' semanas')) + ' · ' + p.sessionsRecorded + ' sesiones registradas</div>' +
+        (p.status !== 'ACTIVE' ? '<button class="btn btn-outline btn-sm" style="margin-top:10px;" onclick="onActivatePhase(\'' + p.id + '\')">Activar esta fase</button>' : '') +
+        '</div>';
+    }).join('');
+
+    html += '<div class="section-label">Ajustar semana/día actual</div><div class="card">' +
+      '<p class="ex-meta">Si ya llevas entrenada la fase activa (por ejemplo en papel) y quieres que la app arranque justo donde vas, sin inventar historial:</p>' +
+      '<div class="btn-row" style="margin:10px 0;"><div class="field mb0" style="flex:1;"><label>Semana</label><input type="number" id="inpAdjWeek" min="1" value="1"></div>' +
+      '<div class="field mb0" style="flex:1;"><label>Día (1-6)</label><input type="number" id="inpAdjDay" min="1" max="6" value="1"></div></div>' +
+      '<button class="btn btn-outline btn-sm" onclick="onAdjustRotation_()">Guardar posición</button></div>';
+
+    html += '<div class="section-label">RMs de referencia</div><div class="card">' +
+      rms.map(function (r) { return '<div class="ex-item"><span>' + esc(r.movement_key) + '</span><span class="ex-right">' + r.value_kg + ' kg</span></div>'; }).join('') +
+      '<button class="btn btn-outline btn-sm" style="margin-top:10px;" onclick="onUpdateRmPrompt_()">Actualizar un RM</button></div>';
+
+    html += '<button class="btn btn-secondary" onclick="goScreen(\'importar\'); renderImportar();">＋ Importar nueva fase (CSV)</button>';
+    el('fasesContent').innerHTML = html;
+  }).catch(showError).then(hideLoading);
+}
+
+function onActivatePhase(phaseId) {
+  confirmDialog('¿Activar esta fase?', 'La fase activa actual quedará archivada (no se borra nada). Cada fase recuerda su propia semana/día.', 'Activar', function () {
+    showLoading();
+    gs('activatePhase', phaseId).then(function () { return loadToday(); }).then(renderFases).catch(showError).then(hideLoading);
+  });
+}
+
+function onAdjustRotation_() {
+  var week = Number(el('inpAdjWeek').value), day = Number(el('inpAdjDay').value);
+  showLoading();
+  gs('adjustRotationPosition', week, day).then(function () {
+    showToast('Ajustado: semana ' + week + ', día ' + day + '.');
+    return loadToday();
+  }).catch(showError).then(hideLoading);
+}
+
+function onUpdateRmPrompt_() {
+  var movement = prompt('Clave del movimiento (ej. SNATCH, BENCH_PRESS, DEADLIFT, MILITARY_PRESS, SQUAT, CLEAN_JERK):');
+  if (!movement) return;
+  var value = prompt('Nuevo RM en kg:');
+  if (!value) return;
+  showLoading();
+  gs('updateRm', movement.trim().toUpperCase(), Number(value), '').then(function () { renderFases(); }).catch(showError).then(hideLoading);
+}
+
+/* ============================================================================================
+ * 13. IMPORTAR CSV
+ * ==========================================================================================*/
+
+var importMode = 'new'; // 'new' = crear fase nueva (archiva la actual) | 'active' = añadir a la fase activa
+
+function renderImportar() {
+  importMode = 'new';
+  el('importarContent').innerHTML =
+    '<div class="btn-row" style="margin-bottom:14px;">' +
+    '<button class="btn btn-sm ' + (importMode === 'new' ? 'btn-primary' : 'btn-secondary') + '" id="modeBtnNew" onclick="setImportMode_(\'new\')">Nueva fase</button>' +
+    '<button class="btn btn-sm ' + (importMode === 'active' ? 'btn-primary' : 'btn-secondary') + '" id="modeBtnActive" onclick="setImportMode_(\'active\')">Añadir a la fase activa</button></div>' +
+    '<div id="impModeFields"></div>' +
+    '<div class="upload-box" onclick="document.getElementById(\'impFile\').click()">⬆<br>Selecciona un archivo CSV</div>' +
+    '<input type="file" id="impFile" accept=".csv" style="display:none" onchange="onCsvFileSelected_(event)">' +
+    '<div id="impPreview"></div>';
+  renderImportModeFields_();
+  el('importarCta').innerHTML = '';
+}
+
+function setImportMode_(mode) {
+  importMode = mode;
+  el('modeBtnNew').className = 'btn btn-sm ' + (mode === 'new' ? 'btn-primary' : 'btn-secondary');
+  el('modeBtnActive').className = 'btn btn-sm ' + (mode === 'active' ? 'btn-primary' : 'btn-secondary');
+  renderImportModeFields_();
+  el('impPreview').innerHTML = '';
+  el('importarCta').innerHTML = '';
+}
+
+function renderImportModeFields_() {
+  if (importMode === 'new') {
+    el('impModeFields').innerHTML =
+      '<div class="banner-warning">Crea una fase nueva y ACTIVA; la fase activa actual queda archivada (nada se borra).</div>' +
+      '<div class="field"><label>Nombre de la nueva fase</label><input id="impPhaseName" placeholder="Ej. Definición"></div>' +
+      '<div class="btn-row"><div class="field" style="flex:1;"><label>Semanas</label><input id="impWeeks" type="number" value="6"></div>' +
+      '<div class="field" style="flex:1;"><label>Descripción</label><input id="impDesc" placeholder="Opcional"></div></div>';
+  } else {
+    el('impModeFields').innerHTML =
+      '<div class="banner-warning">Añade días/ejercicios/WOD/calentamientos/RMs a tu fase activa actual (' + esc((APP.today && APP.today.phase && APP.today.phase.name) || '') + '). Útil para rellenar semanas que aún no tienen programación. Si reimportas el mismo día dos veces, se duplican sus ejercicios — borra las filas antiguas en PROGRAM_EXERCISES antes de reimportar.</div>';
+  }
+}
+
+function onCsvFileSelected_(evt) {
+  var file = evt.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function (e) {
+    APP.csvText = e.target.result;
+    showLoading();
+    var previewCall = importMode === 'new'
+      ? gs('previewImportCsv', APP.csvText, (el('impPhaseName').value || file.name.replace(/\.csv$/i, '')))
+      : gs('previewImportIntoActivePhase', APP.csvText);
+    previewCall.then(function (preview) {
+      var s = preview.summary;
+      var warn = (importMode === 'new' && preview.phaseNameAlreadyExists) ? '<div class="banner-warning">Ya existe una fase con ese nombre. Se creará otra distinta (no se sobrescribe nada).</div>' : '';
+      el('impPreview').innerHTML = '<div class="section-label">Previsualización de importación</div>' +
+        '<div class="card"><div class="ex-item"><span>Días programados</span><span class="ex-right">' + s.days + '</span></div>' +
+        '<div class="ex-item"><span>Ejercicios</span><span class="ex-right">' + s.exercises + '</span></div>' +
+        '<div class="ex-item"><span>WODs</span><span class="ex-right">' + s.wods + '</span></div>' +
+        '<div class="ex-item"><span>Calentamientos</span><span class="ex-right">' + s.warmupItems + '</span></div>' +
+        '<div class="ex-item"><span>RMs</span><span class="ex-right">' + s.rms + '</span></div></div>' + warn +
+        (importMode === 'new' && preview.currentActivePhaseName ? '<div class="banner-warning">La fase "' + esc(preview.currentActivePhaseName) + '" pasará a estar archivada. Su historial y programación se conservan intactos.</div>' : '');
+      el('importarCta').innerHTML = '<button class="btn btn-outline" onclick="renderImportar()">Cancelar</button><button class="btn btn-primary" onclick="onConfirmImportClick_()">Confirmar importación</button>';
+    }).catch(showError).then(hideLoading);
+  };
+  reader.readAsText(file);
+}
+
+function onConfirmImportClick_() {
+  showLoading();
+  if (importMode === 'new') {
+    var phaseName = el('impPhaseName').value.trim();
+    if (!phaseName) { showError(new Error('Ponle un nombre a la fase.')); hideLoading(); return; }
+    var weeks = Number(el('impWeeks').value) || 6;
+    var desc = el('impDesc').value;
+    gs('confirmImportCsv', APP.csvText, phaseName, weeks, desc).then(function () {
+      showToast('Fase "' + phaseName + '" importada y activada.');
+      APP.csvText = null;
+      return loadToday();
+    }).then(function () { goScreen('fases'); renderFases(); }).catch(showError).then(hideLoading);
+  } else {
+    gs('confirmImportIntoActivePhase', APP.csvText).then(function () {
+      showToast('Programación añadida a la fase activa.');
+      APP.csvText = null;
+      return loadToday();
+    }).then(function () { goScreen('fases'); renderFases(); }).catch(showError).then(hideLoading);
+  }
+}
+
+/* ============================================================================================
+ * 14. AJUSTES
+ * ==========================================================================================*/
+
+function renderAjustes() {
+  el('ajustesContent').innerHTML =
+    '<div class="card"><div class="row-between"><span>Sonido de temporizadores</span><button class="toggle ' + (APP.config.soundOn ? '' : 'off') + '" onclick="onToggleConfig_(\'sound_on\')"></button></div>' +
+    '<div class="divider"></div><div class="row-between"><span>Vibración</span><button class="toggle ' + (APP.config.vibrationOn ? '' : 'off') + '" onclick="onToggleConfig_(\'vibration_on\')"></button></div></div>' +
+    '<div class="section-label">Programación</div><div class="card stack">' +
+    '<button class="btn btn-outline btn-sm" onclick="goScreen(\'fases\')">Gestionar fases</button>' +
+    '<button class="btn btn-outline btn-sm" onclick="goScreen(\'importar\'); renderImportar();">Importar CSV</button></div>';
+}
+
+function onToggleConfig_(key) {
+  var current = key === 'sound_on' ? APP.config.soundOn : APP.config.vibrationOn;
+  var next = !current;
+  if (key === 'sound_on') APP.config.soundOn = next; else APP.config.vibrationOn = next;
+  renderAjustes();
+  gs('setConfig', key, next).catch(showError);
+}
+
+/* ============================================================================================
+ * Modal genérico (confirmaciones)
+ * ==========================================================================================*/
+
+function openModal(bodyHtml, buttons) {
+  var btnsHtml = buttons.map(function (b, i) { return '<button class="btn ' + b.cls + '" id="modalBtn' + i + '" style="margin-top:' + (i === 0 ? '6' : '0') + 'px;">' + b.label + '</button>'; }).join('');
+  el('modalRoot').innerHTML = '<div class="modal-overlay" id="modalOverlay"><div class="modal-card">' + bodyHtml + '<div class="stack" style="margin-top:14px;">' + btnsHtml + '</div></div></div>';
+  buttons.forEach(function (b, i) { el('modalBtn' + i).onclick = b.action; });
+}
+function closeModal() { el('modalRoot').innerHTML = ''; }
+function confirmDialog(title, subtitle, confirmLabel, onConfirm) {
+  var body = '<div class="h2 center">' + esc(title) + '</div><p class="sub center">' + esc(subtitle) + '</p>';
+  openModal(body, [
+    { label: 'Cancelar', cls: 'btn-outline', action: closeModal },
+    { label: confirmLabel, cls: 'btn-danger', action: function () { closeModal(); onConfirm(); } }
+  ]);
+}
+</script>
+
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').catch(function () { /* no debe romper la app si falla */ });
+  });
+}
+</script>
+</body>
+</html>
