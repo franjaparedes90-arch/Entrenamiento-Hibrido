@@ -1640,7 +1640,18 @@ function loadToday() {
       renderHoy(view);
       goScreen('hoy');
     }
-  }).catch(function (e) { showError(e); });
+  }).catch(function (e) {
+    // 2026-08-28: antes, si getTodayView fallaba (típicamente "no hay ninguna fase activa" — el
+    // caso de una instalación nueva, sin ningún CSV importado todavía) esto solo mostraba un
+    // toast que desaparece solo, sin activar NINGUNA pantalla — la app quedaba completamente en
+    // blanco (ninguna .screen tenía la clase "active"). Ahora, además del toast, se muestra un
+    // estado vacío dentro de la propia pantalla "Hoy" con un botón directo a Fases, para que
+    // siempre quede algo visible y navegable.
+    showError(e);
+    el('hoyContent').innerHTML = '<div class="empty-state">' + esc(e && e.message ? e.message : 'No se pudo cargar el entrenamiento de hoy.') + '</div>';
+    el('hoyCta').innerHTML = '<button class="btn btn-secondary" onclick="goScreen(\'fases\')">Ir a Fases</button>';
+    goScreen('hoy');
+  });
 }
 
 /* ============================================================================================
