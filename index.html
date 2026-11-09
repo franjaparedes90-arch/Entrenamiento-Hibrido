@@ -1529,7 +1529,8 @@ function esc(s) { return (s === undefined || s === null) ? '' : String(s).replac
 
 function formatMMSS(totalSeconds) {
   totalSeconds = Math.max(0, Math.round(totalSeconds));
-  var m = Math.floor(totalSeconds / 60), s = totalSeconds % 60;
+  var h = Math.floor(totalSeconds / 3600), m = Math.floor((totalSeconds % 3600) / 60), s = totalSeconds % 60;
+  if (h > 0) return h + ':' + (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
   return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
 }
 function weightLabel(value, type, unit) {
@@ -1898,10 +1899,8 @@ function stopGlobalClockTicker_() { clearInterval(APP.timers.global); }
 function tickGlobalClock_(targetElId) {
   if (!APP.sessionState) return;
   var s = APP.sessionState.session;
-  var elapsed = Number(APP.sessionState.activeElapsedSeconds) || 0;
-  if (s.status === 'IN_PROGRESS' && s.last_resume_time) {
-    elapsed += Math.round((Date.now() - new Date(s.last_resume_time).getTime()) / 1000);
-  }
+  // Fix 09/11/2026: activeElapsedSeconds ya incluye el tramo en curso; se recalcula desde la sesión para no sumarlo dos veces
+  var elapsed = computeActiveElapsedSeconds_(s);
   var t = el(targetElId);
   if (t) t.textContent = '⏱ Sesión ' + formatMMSS(elapsed);
 }

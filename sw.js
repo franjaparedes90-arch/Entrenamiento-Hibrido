@@ -12,7 +12,7 @@
  * sube el número de CACHE_VERSION al publicar cambios.
  */
 
-var CACHE_VERSION = 'mientrenamiento-shell-v1';
+var CACHE_VERSION = 'mientrenamiento-shell-v2';
 var SHELL_FILES = [
   './',
   './index.html',
